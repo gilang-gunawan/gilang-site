@@ -1,0 +1,153 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const allProjects = await getCollection('projects', ({ data }) => !data.draft);
+
+// Sort projects by date descending
+const projects = allProjects.sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
+);
+---
+
+<BaseLayout
+  title="Projects"
+  description="A showcase of my projects, experiments, and open-source contributions."
+>
+  <div class="hero">
+    <h1>Projects</h1>
+    <p style="color: var(--color-text-muted); font-size: 0.95rem; margin-top: 0;">
+      {projects.length} {projects.length === 1 ? 'project' : 'projects'} — things I've built.
+    </p>
+  </div>
+
+  {projects.length === 0 ? (
+    <p style="color: var(--color-text-muted); text-align: center; padding: 3rem 0;">
+      No projects yet. Check back soon.
+    </p>
+  ) : (
+    <div class="projects-grid">
+      {projects.map((project) => (
+        <div class="project-card">
+          <a href={`/projects/${project.id}`} class="project-title-link">
+            <h2>{project.data.title}</h2>
+          </a>
+          
+          <div class="project-meta">
+            <span class="project-category">{project.data.category}</span>
+            {project.data.tags && project.data.tags.length > 0 && (
+              <span class="project-tags">
+                &bull; {project.data.tags.join(', ')}
+              </span>
+            )}
+          </div>
+          
+          <p class="project-description">{project.data.description}</p>
+          
+          <div class="project-links">
+            {project.data.link && (
+              <a href={project.data.link} target="_blank" rel="noopener noreferrer" class="external-link">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line>
+                </svg>
+                Visit Site
+              </a>
+            )}
+            {project.data.sourceCode && (
+              <a href={project.data.sourceCode} target="_blank" rel="noopener noreferrer" class="external-link">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                </svg>
+                Source
+              </a>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  )}
+</BaseLayout>
+
+<style>
+  .projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+  }
+  
+  .project-card {
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem;
+    border: 1px solid var(--color-border, #eaeaea);
+    border-radius: 8px;
+    background-color: var(--color-bg-secondary, transparent);
+    transition: transform 0.2s ease, border-color 0.2s ease;
+  }
+  
+  :global(.dark) .project-card {
+    border-color: var(--color-border, #333);
+  }
+  
+  .project-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--color-text-emphasized, #000);
+  }
+  
+  :global(.dark) .project-card:hover {
+    border-color: var(--color-text-emphasized, #fff);
+  }
+  
+  .project-title-link {
+    text-decoration: none;
+    color: inherit;
+  }
+  
+  .project-title-link:hover {
+    text-decoration: underline;
+  }
+
+  .project-card h2 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.25rem;
+    color: var(--color-text-emphasized);
+  }
+  
+  .project-meta {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    margin-bottom: 0.75rem;
+  }
+  
+  .project-category {
+    font-weight: 500;
+  }
+  
+  .project-description {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    flex-grow: 1;
+    margin-bottom: 1.25rem;
+  }
+  
+  .project-links {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-top: auto;
+  }
+  
+  .external-link {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.85rem;
+    text-decoration: none;
+    font-weight: 500;
+  }
+  
+  .external-link:hover {
+    text-decoration: underline;
+  }
+</style>
