@@ -15,6 +15,22 @@ const blog = defineCollection({
   }),
 });
 
+// ── Projects collection ────────────────────────────────────────────────────
+// Source: content/ submodule → gilang-content/projects/
+const projects = defineCollection({
+  loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/projects" }),
+  schema: z.object({
+    title: z.string(),
+    description: z.string(),
+    date: z.coerce.date(),
+    category: z.string(),
+    tags: z.array(z.string()).optional(),
+    link: z.string().url().optional(),
+    sourceCode: z.string().url().optional(),
+    draft: z.boolean().optional().default(false),
+  }),
+});
+
 // ── Pages collection ───────────────────────────────────────────────────────
 // Source: content/ submodule → gilang-content/pages/
 // Covers: home, about, resume
@@ -37,4 +53,4 @@ const pages = defineCollection({
   }),
 });
 
-export const collections = { blog, pages };
+export const collections = { blog, pages, projects };
