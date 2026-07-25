@@ -1,0 +1,24 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+// Fetch resume page content
+const allPages = await getCollection('pages');
+const resumePage = allPages.find((p) => p.id === 'resume');
+
+if (!resumePage) {
+  throw new Error('Missing content/pages/resume.mdx in the content submodule.');
+}
+
+const { title, description } = resumePage.data;
+const { Content, headings } = await render(resumePage);
+---
+
+<BaseLayout title={title} description={description} showTOC={true} headings={headings}>
+  <article class="page-article">
+    <h1>{title}</h1>
+    <div class="prose">
+      <Content />
+    </div>
+  </article>
+</BaseLayout>

@@ -1,0 +1,81 @@
+---
+import { getCollection, render } from "astro:content";
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+// Fetch home page content from pages collection
+const allPages = await getCollection("pages");
+const homePage = allPages.find((p) => p.id === "home");
+
+if (!homePage) {
+  throw new Error("Missing content/pages/home.mdx in the content submodule.");
+}
+
+const { title, description, links, currently } = homePage.data;
+const { Content } = await render(homePage);
+---
+
+<BaseLayout title={title} description={description}>
+  <div class="hero hero-index">
+    <!-- Hero: flex row — text left, avatar right -->
+    <div class="hero-wrapper">
+      <div>
+        <h1>{title}</h1>
+
+        <!-- Prose bio from MDX body -->
+        <div class="hero-description">
+          <Content />
+        </div>
+
+        <!-- External links from frontmatter -->
+        {
+          links && links.length > 0 && (
+            <div class="large-links">
+              {links.map((link) => (
+                <a
+                  href={link.href}
+                  target={link.href.startsWith("http") ? "_blank" : undefined}
+                  rel={
+                    link.href.startsWith("http")
+                      ? "noopener noreferrer"
+                      : undefined
+                  }
+                  class="large-link"
+                >
+                  {link.label}
+                </a>
+              ))}
+            </div>
+          )
+        }
+      </div>
+
+      <!-- Avatar / photo placeholder -->
+      <!-- <div class="hero-image-container">
+        <div
+          class="hero-image"
+          style="background: var(--color-background-card); border: 2px solid var(--color-border-card); display: flex; align-items: center; justify-content: center; font-size: 3rem; flex-shrink: 0;"
+          aria-hidden="true"
+        >
+          👨‍💻
+        </div>
+      </div> -->
+    </div>
+  </div>
+
+  <!-- Currently section from frontmatter -->
+  {
+    currently && currently.length > 0 && (
+      <div class="currently-section">
+        <h2>Currently</h2>
+        <ul class="currently-list">
+          {currently.map((item) => (
+            <li class="currently-item">
+              <span class="currently-label">{item.label}</span>
+              <span class="currently-value">{item.value}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    )
+  }
+</BaseLayout>

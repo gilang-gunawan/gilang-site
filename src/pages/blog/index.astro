@@ -1,0 +1,63 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const allPosts = await getCollection('blog', ({ data }) => !data.draft);
+
+// Group posts by year (like Tania)
+const posts = allPosts.sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
+);
+
+// Group by year
+const postsByYear = posts.reduce<Record<number, typeof posts>>((acc, post) => {
+  const year = post.data.date.getFullYear();
+  if (!acc[year]) acc[year] = [];
+  acc[year].push(post);
+  return acc;
+}, {});
+
+const years = Object.keys(postsByYear)
+  .map(Number)
+  .sort((a, b) => b - a);
+---
+
+<BaseLayout
+  title="Blog"
+  description="Writing about software engineering, code craft, and building things that last."
+>
+  <div class="hero">
+    <h1>Blog</h1>
+    <p style="color: var(--color-text-muted); font-size: 0.95rem; margin-top: 0;">
+      {posts.length} {posts.length === 1 ? 'post' : 'posts'} — thoughts on code and craft.
+    </p>
+  </div>
+
+  {posts.length === 0 ? (
+    <p style="color: var(--color-text-muted); text-align: center; padding: 3rem 0;">
+      No posts yet. Check back soon.
+    </p>
+  ) : (
+    <div>
+      {years.map((year) => (
+        <div class="year">
+          <h2>{year}</h2>
+          {postsByYear[year].map((post) => {
+            const formattedDate = post.data.date.toLocaleDateString('en-US', {
+              month: 'short',
+              day: 'numeric',
+            });
+            return (
+              <a href={`/blog/${post.id}`} class="post">
+                <div>
+                  <time datetime={post.data.date.toISOString()}>{formattedDate}</time>
+                  <span style="color: var(--color-text-emphasized);">{post.data.title}</span>
+                </div>
+              </a>
+            );
+          })}
+        </div>
+      ))}
+    </div>
+  )}
+</BaseLayout>

@@ -1,0 +1,43 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const allPages = await getCollection('pages');
+const aboutPage = allPages.find((p) => p.id === 'about');
+
+if (!aboutPage) {
+  throw new Error('Missing content/pages/about.mdx in the content submodule.');
+}
+
+const { title, description, skills } = aboutPage.data;
+const { Content, headings } = await render(aboutPage);
+---
+
+<BaseLayout title={title} description={description} showTOC={true} headings={headings}>
+  <article class="page-article">
+    <h1>{title}</h1>
+
+    <!-- Prose bio from MDX body -->
+    <div class="prose">
+      <Content />
+    </div>
+
+    <!-- Skills grid from frontmatter -->
+    {skills && skills.length > 0 && (
+      <>
+        <hr class="page-divider" />
+        <div class="skills-section">
+          <h2>Technical Skills</h2>
+          <div class="skills-grid">
+            {skills.map((skill) => (
+              <div class="skill-item">
+                <span class="skill-category">{skill.category}</span>
+                <span class="skill-items">{skill.items}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </>
+    )}
+  </article>
+</BaseLayout>

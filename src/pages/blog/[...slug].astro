@@ -1,0 +1,78 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog', ({ data }) => !data.draft);
+  return posts.map((post) => ({
+    params: { slug: post.id },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const { Content, headings } = await render(post);
+
+const { title, description, date, updatedDate, tags } = post.data;
+
+const formattedDate = date.toLocaleDateString('en-US', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+});
+
+const formattedUpdatedDate = updatedDate?.toLocaleDateString('en-US', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+});
+---
+
+<BaseLayout title={title} description={description} showTOC={true} headings={headings}>
+  <article class="post-article">
+    <!-- Post Header -->
+    <header class="post-header">
+      <div>
+        <a href="/blog" class="post-back-link">
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M19 12H5M12 5l-7 7 7 7"/>
+          </svg>
+          Blog
+        </a>
+      </div>
+
+      <h1>{title}</h1>
+
+      <div class="post-meta">
+        <time datetime={date.toISOString()}>{formattedDate}</time>
+
+        {formattedUpdatedDate && (
+          <span>· Updated {formattedUpdatedDate}</span>
+        )}
+
+        {tags && tags.length > 0 && (
+          <div class="post-tags">
+            {tags.map((tag) => (
+              <span class="post-tag">{tag}</span>
+            ))}
+          </div>
+        )}
+      </div>
+    </header>
+
+    <!-- Post Content -->
+    <div class="prose main-article">
+      <Content />
+    </div>
+
+    <!-- Back to Blog -->
+    <footer class="post-footer">
+      <a href="/blog" class="post-back-link">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M19 12H5M12 5l-7 7 7 7"/>
+        </svg>
+        Back to all posts
+      </a>
+    </footer>
+  </article>
+</BaseLayout>
