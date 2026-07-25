@@ -1,0 +1,76 @@
+---
+interface Heading {
+  depth: number;
+  slug: string;
+  text: string;
+}
+
+interface Props {
+  headings: Heading[];
+}
+
+const { headings } = Astro.props;
+// Only show h2 and h3
+const filtered = headings.filter((h) => h.depth === 2 || h.depth === 3);
+---
+
+{filtered.length > 0 && (
+  <nav class="toc" aria-label="Table of contents">
+    <h2 class="toc-title">Table of Contents</h2>
+    <ul class="toc-list" role="list">
+      {filtered.map((heading) => (
+        <li class:list={['toc-item', `toc-h${heading.depth}`]}>
+          <a
+            href={`#${heading.slug}`}
+            class="toc-link"
+            data-toc-link
+          >
+            {heading.text}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+)}
+
+<script>
+  // Highlight active TOC link using IntersectionObserver
+  const links = Array.from(document.querySelectorAll<HTMLAnchorElement>('[data-toc-link]'));
+
+  if (links.length > 0) {
+    const headingEls: HTMLElement[] = [];
+
+    links.forEach((link) => {
+      const id = link.getAttribute('href')?.slice(1);
+      if (id) {
+        const el = document.getElementById(id);
+        if (el) headingEls.push(el);
+      }
+    });
+
+    let activeId: string | null = null;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            activeId = entry.target.id;
+          }
+        });
+
+        // Update active state
+        links.forEach((link) => {
+          const href = link.getAttribute('href');
+          const isActive = href === `#${activeId}`;
+          link.classList.toggle('toc-link--active', isActive);
+        });
+      },
+      {
+        rootMargin: '-10% 0% -75% 0%',
+        threshold: 0,
+      }
+    );
+
+    headingEls.forEach((el) => observer.observe(el));
+  }
+</script>

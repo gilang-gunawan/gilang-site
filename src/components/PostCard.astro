@@ -1,0 +1,37 @@
+---
+interface Props {
+  title: string;
+  description: string;
+  pubDate: Date;
+  slug: string;
+}
+
+const { title, description, pubDate, slug } = Astro.props;
+
+const formattedDate = pubDate.toLocaleDateString('en-US', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+});
+---
+
+<article class="group py-5 border-b border-[var(--color-border)] last:border-0">
+  <a href={`/blog/${slug}`} class="block space-y-1.5 no-underline">
+    <time
+      datetime={pubDate.toISOString()}
+      class="text-xs text-[var(--color-text-muted)] font-mono tracking-wide uppercase"
+    >
+      {formattedDate}
+    </time>
+
+    <h2
+      class="text-base font-semibold text-[var(--color-text)] group-hover:text-[var(--color-accent)] transition-colors duration-150 leading-snug"
+    >
+      {title}
+    </h2>
+
+    <p class="text-sm text-[var(--color-text-muted)] leading-relaxed line-clamp-2">
+      {description}
+    </p>
+  </a>
+</article>

@@ -1,0 +1,73 @@
+---
+import Sidebar from '../components/Sidebar.astro';
+import TOC from '../components/TOC.astro';
+import '../styles/global.css';
+import site from '../content/config/site.json';
+
+interface Props {
+  title: string;
+  description?: string;
+  showTOC?: boolean;
+  headings?: { depth: number; slug: string; text: string }[];
+}
+
+const {
+  title,
+  description = site.description,
+  showTOC = false,
+  headings = [],
+} = Astro.props;
+
+const fullTitle = title === site.name ? site.name : `${title} — ${site.name}`;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- Open Graph -->
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={site.url} />
+
+    <title>{fullTitle}</title>
+
+    <!-- Prevent flash of wrong theme (must be synchronous, before paint) -->
+    <script is:inline>
+      (function () {
+        const stored = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const isDark = stored === 'dark' || (!stored && prefersDark);
+        const isLight = stored === 'light' || (!stored && !prefersDark);
+        if (isDark) document.documentElement.classList.add('is-dark');
+        if (isLight) document.documentElement.classList.add('is-light');
+      })();
+    </script>
+  </head>
+
+  <body>
+    <div class:list={['layout', { 'has-toc': showTOC && headings.length > 0 }]}>
+      <Sidebar />
+
+      <div class="main-wrapper">
+        <main class="main-content" id="main-content" tabindex="-1">
+          <slot />
+        </main>
+      </div>
+
+      {showTOC && headings.length > 0 && (
+        <aside class="toc-panel" aria-label="Table of contents">
+          <div class="toc-inner">
+            <TOC headings={headings} />
+          </div>
+        </aside>
+      )}
+    </div>
+  </body>
+</html>
