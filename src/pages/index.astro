@@ -1,6 +1,7 @@
 ---
 import { getCollection, render } from "astro:content";
 import BaseLayout from "../layouts/BaseLayout.astro";
+import { contact } from "../site.config";
 
 // Fetch home page content from pages collection
 const allPages = await getCollection("pages");
@@ -10,8 +11,16 @@ if (!homePage) {
   throw new Error("Missing content/pages/home.mdx in the content submodule.");
 }
 
-const { title, description, links, currently } = homePage.data;
+const { title, description, currently } = homePage.data;
 const { Content } = await render(homePage);
+
+// Contact links sourced from env (see .env.example) rather than frontmatter,
+// since YAML frontmatter can't reference environment variables.
+const links = [
+  { label: "GitHub", href: contact.github },
+  contact.bluesky && { label: "Bluesky", href: contact.bluesky },
+  { label: "Email", href: `mailto:${contact.email}` },
+].filter((link): link is { label: string; href: string } => Boolean(link));
 ---
 
 <BaseLayout title={title} description={description}>
