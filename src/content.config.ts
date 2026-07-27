@@ -40,9 +40,6 @@ const pages = defineCollection({
     title: z.string(),
     description: z.string().optional(),
     // home.mdx structured data
-    links: z
-      .array(z.object({ label: z.string(), href: z.string() }))
-      .optional(),
     currently: z
       .array(z.object({ label: z.string(), value: z.string() }))
       .optional(),
