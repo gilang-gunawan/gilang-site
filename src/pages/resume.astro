@@ -21,13 +21,25 @@ const { Content, headings } = await render(resumePage);
   <article class="page-article">
     <h1>{title}</h1>
     <div class="prose">
-      <p>
-        <a href={resumeUrl} download="Gilang_Gunawan_Resume_2026.pdf">📥 Download Resume (PDF)</a>
-      </p>
-      <p>
-        Jakarta, Indonesia | {contact.phone} | <a href={`mailto:${contact.email}`}>Email</a> | <a href={contact.linkedin} target="_blank" rel="noopener noreferrer">LinkedIn</a> | <a href={contact.github} target="_blank" rel="noopener noreferrer">GitHub</a> | <a href={site.url} target="_blank" rel="noopener noreferrer">Website</a>
-      </p>
+      <div class="resume-contact">
+        <p>
+          <a href={resumeUrl} download="Gilang_Gunawan_Resume_2026.pdf">📥 Download Resume (1-page PDF)</a>
+        </p>
+        <p>
+          Jakarta, Indonesia | {contact.phone} | <a href={`mailto:${contact.email}`}>Email</a> | <a href={contact.linkedin} target="_blank" rel="noopener noreferrer">LinkedIn</a> | <a href={contact.github} target="_blank" rel="noopener noreferrer">GitHub</a> | <a href={site.url} target="_blank" rel="noopener noreferrer">Website</a>
+        </p>
+      </div>
       <Content />
     </div>
   </article>
 </BaseLayout>
+
+<style>
+  .resume-contact p {
+    margin: 0.35rem 0;
+  }
+
+  .prose h2:first-of-type {
+    margin-top: 0.75rem;
+  }
+</style>

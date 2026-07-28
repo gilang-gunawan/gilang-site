@@ -934,17 +934,81 @@ a.large-link:hover,
   text-decoration-style: dotted !important;
 }
 
-/* ─── Currently Section ──────────────────────────────────────────────────────── */
-.currently-section {
-  margin-top: 2rem;
+/* ─── Home Hub Sections (Featured Projects / Latest Writing / Contact) ───────── */
+.home-section {
+  margin-top: 2.5rem;
 }
 
-.currently-section h2 {
-  font-size: 0.95rem;
+@media screen and (min-width: 800px) {
+  .home-section {
+    margin-top: 3.5rem;
+  }
+
+
+}
+
+.home-section-title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin: 0 0 1.25rem;
+}
+
+.home-item {
+  display: block;
+  padding: 1.1rem 0;
+  border-bottom: 1px solid var(--color-border);
+  text-decoration: none;
+}
+
+.home-item:first-child {
+  padding-top: 0;
+}
+
+.home-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.home-item-title {
+  font-size: 1.05rem;
   font-weight: 600;
   color: var(--color-text-emphasized);
+  margin: 0 0 0.35rem;
+  transition: color 0.15s ease;
+}
+
+.home-item:hover .home-item-title {
+  color: var(--color-primary);
+}
+
+.home-item-desc {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--color-text-muted);
+  margin: 0 0 0.6rem;
+}
+
+.home-item-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+/* ─── Currently Section ──────────────────────────────────────────────────────── */
+.currently-section h2 {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
   margin-top: 0;
-  margin-bottom: 0.75rem;
+  margin-bottom: 1.25rem;
 }
 
 .currently-list {
