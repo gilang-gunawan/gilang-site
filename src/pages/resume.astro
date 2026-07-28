@@ -2,7 +2,7 @@
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import site from '../content/config/site.json';
-import { contact } from '../site.config';
+import { contact, getSocialLinks } from '../site.config';
 import resumeUrl from '../content/assets/gilang-gunawan-resume-2026.pdf';
 
 // Fetch resume page content
@@ -15,6 +15,15 @@ if (!resumePage) {
 
 const { title, description } = resumePage.data;
 const { Content, headings } = await render(resumePage);
+
+const socialLinks = getSocialLinks();
+const resumeContactItems = [
+  'Jakarta, Indonesia',
+  contact.phone && contact.phone.trim() !== '' ? contact.phone : undefined,
+  contact.email && contact.email.trim() !== '' ? { label: 'Email', href: `mailto:${contact.email}` } : undefined,
+  ...socialLinks.map((s) => ({ label: s.label, href: s.href })),
+  site.url && site.url.trim() !== '' ? { label: 'Website', href: site.url } : undefined,
+].filter((item): item is string | { label: string; href: string } => Boolean(item));
 ---
 
 <BaseLayout title={title} description={description} showTOC={true} headings={headings}>
@@ -26,7 +35,22 @@ const { Content, headings } = await render(resumePage);
           <a href={resumeUrl} download="Gilang_Gunawan_Resume_2026.pdf">📥 Download Resume (1-page PDF)</a>
         </p>
         <p>
-          Jakarta, Indonesia | {contact.phone} | <a href={`mailto:${contact.email}`}>Email</a> | <a href={contact.linkedin} target="_blank" rel="noopener noreferrer">LinkedIn</a> | <a href={contact.github} target="_blank" rel="noopener noreferrer">GitHub</a> | <a href={site.url} target="_blank" rel="noopener noreferrer">Website</a>
+          {resumeContactItems.map((item, index) => (
+            <Fragment key={index}>
+              {index > 0 && ' | '}
+              {typeof item === 'string' ? (
+                item
+              ) : (
+                <a
+                  href={item.href}
+                  target={item.href.startsWith('http') ? '_blank' : undefined}
+                  rel={item.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+                >
+                  {item.label}
+                </a>
+              )}
+            </Fragment>
+          ))}
         </p>
       </div>
       <Content />

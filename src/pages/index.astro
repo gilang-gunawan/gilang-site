@@ -1,7 +1,7 @@
 ---
 import { getCollection, render } from "astro:content";
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { contact } from "../site.config";
+import { contact, getSocialLinks } from "../site.config";
 
 // Fetch home page content from pages collection
 const allPages = await getCollection("pages");
@@ -34,13 +34,16 @@ const quickLinks = [
   },
 ];
 
-// Contact links sourced from env (see .env.example) rather than frontmatter,
-// since YAML frontmatter can't reference environment variables.
+// Contact links sourced from site.json
+const socialLinks = getSocialLinks();
 const links = [
-  { label: "GitHub", href: contact.github },
-  contact.bluesky && { label: "Bluesky", href: contact.bluesky },
-  { label: "Email", href: `mailto:${contact.email}` },
-].filter((link): link is { label: string; href: string } => Boolean(link));
+  ...socialLinks.map((s) => ({ label: s.label, href: s.href })),
+  contact.email && contact.email.trim() !== ""
+    ? { label: "Email", href: `mailto:${contact.email}` }
+    : undefined,
+].filter((link): link is { label: string; href: string } =>
+  Boolean(link && link.href)
+);
 
 // Featured projects: prefer projects explicitly marked `featured`, otherwise
 // fall back to the 3 most recent.
