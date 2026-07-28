@@ -40,14 +40,6 @@ const pages = defineCollection({
   schema: z.object({
     title: z.string(),
     description: z.string().optional(),
-    // home.mdx structured data
-    currently: z
-      .array(z.object({ label: z.string(), value: z.string() }))
-      .optional(),
-    // about.mdx skills
-    skills: z
-      .array(z.object({ category: z.string(), items: z.string() }))
-      .optional(),
   }),
 });
 

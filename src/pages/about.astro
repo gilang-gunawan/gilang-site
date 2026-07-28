@@ -9,7 +9,7 @@ if (!aboutPage) {
   throw new Error('Missing content/pages/about.mdx in the content submodule.');
 }
 
-const { title, description, skills, currently } = aboutPage.data;
+const { title, description } = aboutPage.data;
 const { Content, headings } = await render(aboutPage);
 ---
 
@@ -17,45 +17,8 @@ const { Content, headings } = await render(aboutPage);
   <article class="page-article">
     <h1>{title}</h1>
 
-    <!-- Prose bio from MDX body -->
     <div class="prose">
       <Content />
     </div>
-
-    <!-- Currently section from frontmatter -->
-    {currently && currently.length > 0 && (
-      <>
-        <hr class="page-divider" />
-        <section class="currently-section">
-          <h2>Currently</h2>
-          <ul class="currently-list">
-            {currently.map((item) => (
-              <li class="currently-item">
-                <span class="currently-label">{item.label}</span>
-                <span class="currently-value">{item.value}</span>
-              </li>
-            ))}
-          </ul>
-        </section>
-      </>
-    )}
-
-    <!-- Skills grid from frontmatter -->
-    {skills && skills.length > 0 && (
-      <>
-        <hr class="page-divider" />
-        <div class="skills-section">
-          <h2>Technical Skills</h2>
-          <div class="skills-grid">
-            {skills.map((skill) => (
-              <div class="skill-item">
-                <span class="skill-category">{skill.category}</span>
-                <span class="skill-items">{skill.items}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </>
-    )}
   </article>
 </BaseLayout>
