@@ -80,25 +80,17 @@ const projects = allProjects.sort(
     display: flex;
     flex-direction: column;
     padding: 1.5rem;
-    border: 1px solid var(--color-border, #eaeaea);
+    border: 1px solid var(--color-border);
     border-radius: 8px;
-    background-color: var(--color-bg-secondary, transparent);
+    background-color: var(--color-background-card);
     transition: transform 0.2s ease, border-color 0.2s ease;
   }
-  
-  :global(.dark) .project-card {
-    border-color: var(--color-border, #333);
-  }
-  
+
   .project-card:hover {
     transform: translateY(-2px);
-    border-color: var(--color-text-emphasized, #000);
+    border-color: var(--color-text-emphasized);
   }
-  
-  :global(.dark) .project-card:hover {
-    border-color: var(--color-text-emphasized, #fff);
-  }
-  
+
   .project-title-link {
     text-decoration: none;
     color: inherit;

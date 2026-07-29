@@ -1331,7 +1331,27 @@ blockquote :last-child {
     font-family: inherit;
   }
 
-  
+  /* Shiki dual-theme tokens: each span carries --shiki-light/--shiki-dark,
+     set via defaultColor: false in astro.config.mjs. Pick the variable that
+     matches the site's own light/dark toggle (.is-dark / .is-light on <html>). */
+  .prose pre.astro-code,
+  .prose pre.astro-code span {
+    color: var(--shiki-light);
+  }
+
+  :root.is-dark .prose pre.astro-code,
+  :root.is-dark .prose pre.astro-code span {
+    color: var(--shiki-dark);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not(.is-light) .prose pre.astro-code,
+    :root:not(.is-light) .prose pre.astro-code span {
+      color: var(--shiki-dark);
+    }
+  }
+
+
 
   .prose blockquote {
     background: var(--color-background-blockquote);
@@ -1659,34 +1679,4 @@ b {
   font-weight: 700;
 }
 
-/* Mobile header background and text in dark mode */
-.mobile-header {
-  background-color: var(--color-background);
-  border-bottom-color: var(--color-border);
-}
-
-/* Ensure tags in blog respond to dark mode */
-.post-tag,
-.skill-category,
-.skill-items,
-.post-meta,
-.post-meta time {
-  /* color already uses CSS vars — listed here to document intent */
-}
-
-/* Sidebar link text in dark mode */
-.sidebar-section .sidebar-nav-links a,
-.sidebar-section .sidebar-links a {
-  color: var(--color-text-muted);
-}
-
-.sidebar-section .sidebar-nav-links a.active,
-.sidebar-section .sidebar-nav-links a:hover {
-  color: var(--color-text-emphasized);
-  background: var(--color-background-navbar-link-hover);
-}
-
-.sidebar-section .sidebar-links a:hover {
-  color: var(--color-text-emphasized);
-}
 
