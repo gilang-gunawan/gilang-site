@@ -26,7 +26,7 @@ const resumeContactItems = [
 ].filter((item): item is string | { label: string; href: string } => Boolean(item));
 ---
 
-<BaseLayout title={title} description={description} showTOC={true} headings={headings}>
+<BaseLayout title={title} description={description} showTOC={true} headings={headings} ogImage="/og/resume.png">
   <article class="page-article">
     <h1>{title}</h1>
     <div class="prose">
