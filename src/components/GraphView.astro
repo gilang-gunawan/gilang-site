@@ -1,0 +1,238 @@
+---
+/**
+ * GraphView.astro — Build-time knowledge graph, zero runtime JS weight.
+ *
+ * Force-directed layout computed in TypeScript at `astro build` time.
+ * Outputs a static SVG embedded in HTML. Zero external libraries.
+ * Hover edge highlighting: deferred inline script, ~300 bytes.
+ */
+
+interface Props {
+  posts: Array<{ id: string; data: { title: string; tags?: string[] } }>;
+  projects: Array<{ id: string; data: { title: string; tags?: string[] } }>;
+}
+
+const { posts, projects } = Astro.props;
+
+// ── Types ──────────────────────────────────────────────────────────────────────
+
+type Kind = 'post' | 'project' | 'tag';
+
+interface GNode {
+  id: string; kind: Kind; label: string; href?: string;
+  x: number; y: number; vx: number; vy: number;
+}
+interface GEdge { source: string; target: string; }
+
+// ── Build graph data ───────────────────────────────────────────────────────────
+
+const nodes: GNode[] = [];
+const edges: GEdge[] = [];
+
+// Count tag frequency across all content
+const tagFreq = new Map<string, number>();
+for (const item of [...posts, ...projects]) {
+  for (const tag of item.data.tags ?? []) {
+    tagFreq.set(tag, (tagFreq.get(tag) ?? 0) + 1);
+  }
+}
+
+// Only include tags shared by 2+ items — creates meaningful connections
+const sharedTags = new Set(
+  [...tagFreq.entries()].filter(([, n]) => n >= 1).map(([t]) => t),
+);
+
+function clip(s: string, max = 16): string {
+  return s.length > max ? s.slice(0, max - 1) + '\u2026' : s;
+}
+
+// Post nodes
+for (const post of posts) {
+  const id = `p__${post.id}`;
+  nodes.push({ id, kind: 'post', label: clip(post.data.title), href: `/blog/${post.id}`, x:0, y:0, vx:0, vy:0 });
+  for (const tag of post.data.tags ?? []) {
+    if (sharedTags.has(tag)) edges.push({ source: id, target: `t__${tag}` });
+  }
+}
+
+// Project nodes
+for (const project of projects) {
+  const id = `r__${project.id}`;
+  nodes.push({ id, kind: 'project', label: clip(project.data.title), href: `/projects/${project.id}`, x:0, y:0, vx:0, vy:0 });
+  for (const tag of project.data.tags ?? []) {
+    if (sharedTags.has(tag)) edges.push({ source: id, target: `t__${tag}` });
+  }
+}
+
+// Shared tag nodes
+for (const tag of sharedTags) {
+  nodes.push({ id: `t__${tag}`, kind: 'tag', label: tag, x:0, y:0, vx:0, vy:0 });
+}
+
+// ── Force-directed layout (runs at build time, ~2ms) ──────────────────────────
+
+const SVG_W = 252, SVG_H = 350, PAD = 34;
+
+// Deterministic seeded random — same layout on every build
+let _seed = 0x9e3779b9;
+function rng(): number {
+  _seed ^= _seed << 13; _seed ^= _seed >>> 17; _seed ^= _seed << 5;
+  return ((_seed >>> 0) / 0xffffffff);
+}
+
+for (const n of nodes) {
+  n.x = PAD + rng() * (SVG_W - PAD * 2);
+  n.y = PAD + rng() * (SVG_H - PAD * 2);
+}
+
+const nmap = new Map(nodes.map(n => [n.id, n]));
+
+for (let it = 0; it < 280; it++) {
+  const alpha = Math.max(0.05, 1 - it / 280);
+  for (const n of nodes) { n.vx = 0; n.vy = 0; }
+
+  // Repulsion
+  for (let a = 0; a < nodes.length; a++) {
+    for (let b = a + 1; b < nodes.length; b++) {
+      const A = nodes[a], B = nodes[b];
+      const dx = B.x - A.x || 0.1, dy = B.y - A.y || 0.1;
+      const dist = Math.sqrt(dx*dx + dy*dy) + 0.1;
+      const f = (1800 / (dist*dist)) * alpha;
+      A.vx -= (dx/dist)*f; A.vy -= (dy/dist)*f;
+      B.vx += (dx/dist)*f; B.vy += (dy/dist)*f;
+    }
+  }
+
+  // Spring attraction (target: 70px)
+  for (const e of edges) {
+    const A = nmap.get(e.source)!, B = nmap.get(e.target)!;
+    if (!A || !B) continue;
+    const dx = B.x - A.x, dy = B.y - A.y;
+    const dist = Math.sqrt(dx*dx + dy*dy) + 0.1;
+    const f = ((dist - 70) * 0.07) * alpha;
+    A.vx += (dx/dist)*f; A.vy += (dy/dist)*f;
+    B.vx -= (dx/dist)*f; B.vy -= (dy/dist)*f;
+  }
+
+  // Center gravity + clamp
+  for (const n of nodes) {
+    n.vx += (SVG_W/2 - n.x) * 0.025 * alpha;
+    n.vy += (SVG_H/2 - n.y) * 0.025 * alpha;
+    n.x = Math.max(PAD, Math.min(SVG_W - PAD, n.x + n.vx));
+    n.y = Math.max(PAD, Math.min(SVG_H - PAD, n.y + n.vy));
+  }
+}
+
+// ── Helpers ────────────────────────────────────────────────────────────────────
+
+const NODE_R: Record<Kind, number> = { post: 6, project: 6, tag: 3.5 };
+function sid(id: string): string { return id.replace(/[^a-zA-Z0-9]/g, '_'); }
+---
+
+{nodes.length > 0 && (
+  <div class="kgraph-wrap">
+    <svg
+      class="kgraph-svg"
+      viewBox={`0 0 ${SVG_W} ${SVG_H}`}
+      width={SVG_W}
+      height={SVG_H}
+      aria-label={`Knowledge graph — ${nodes.length} nodes, ${edges.length} connections`}
+      role="img"
+    >
+      <g class="kgraph-edges" aria-hidden="true">
+        {edges.map((e, i) => {
+          const A = nmap.get(e.source);
+          const B = nmap.get(e.target);
+          if (!A || !B) return null;
+          return (
+            <line
+              class="kgraph-edge"
+              data-src={sid(e.source)}
+              data-tgt={sid(e.target)}
+              x1={Math.round(A.x)} y1={Math.round(A.y)}
+              x2={Math.round(B.x)} y2={Math.round(B.y)}
+              style={`animation-delay:${i * 60}ms`}
+            />
+          );
+        })}
+      </g>
+
+      <g class="kgraph-nodes">
+        {nodes.map(node => {
+          const r = NODE_R[node.kind];
+          const cx = Math.round(node.x);
+          const cy = Math.round(node.y);
+          const labelY = cy < SVG_H / 2 ? cy + r + 10 : cy - r - 3;
+          const nodeSid = sid(node.id);
+
+          const circle = (
+            <circle
+              class={`kgraph-node kgraph-node--${node.kind}`}
+              cx={cx} cy={cy} r={r}
+            />
+          );
+          const label = (
+            <text class="kgraph-label" x={cx} y={labelY} text-anchor="middle">
+              {node.label}
+            </text>
+          );
+
+          return node.href ? (
+            <a href={node.href} class="kgraph-group" data-nid={nodeSid} aria-label={`${node.kind}: ${node.label}`}>
+              {circle}{label}
+            </a>
+          ) : (
+            <g class="kgraph-group" data-nid={nodeSid} aria-label={node.label}>
+              {circle}{label}
+            </g>
+          );
+        })}
+      </g>
+    </svg>
+
+    <div class="kgraph-legend" aria-hidden="true">
+      <span class="kgraph-legend-item">
+        <span class="kgraph-dot kgraph-dot--post"></span>Post
+      </span>
+      <span class="kgraph-legend-item">
+        <span class="kgraph-dot kgraph-dot--project"></span>Project
+      </span>
+      {sharedTags.size > 0 && (
+        <span class="kgraph-legend-item">
+          <span class="kgraph-dot kgraph-dot--tag"></span>Shared tag
+        </span>
+      )}
+    </div>
+  </div>
+)}
+
+<script>
+  // Hover edge highlighting — deferred (Astro module script), does NOT block render
+  (function () {
+    document.querySelectorAll('.kgraph-svg').forEach(function (svg) {
+      const allEdges = svg.querySelectorAll<SVGLineElement>('.kgraph-edge');
+      const allGroups = svg.querySelectorAll<HTMLElement | SVGElement>('.kgraph-group');
+
+      allGroups.forEach(function (group) {
+        const nid = group.dataset.nid;
+        if (!nid) return;
+
+        group.addEventListener('mouseenter', function () {
+          allEdges.forEach(function (edge) {
+            const active = edge.dataset.src === nid || edge.dataset.tgt === nid;
+            edge.classList.toggle('kgraph-edge--active', active);
+            edge.classList.toggle('kgraph-edge--dim', !active);
+          });
+          allGroups.forEach(function (g) {
+            if (g !== group) g.classList.add('kgraph-group--dim');
+          });
+        });
+
+        group.addEventListener('mouseleave', function () {
+          allEdges.forEach(function (e) { e.classList.remove('kgraph-edge--active', 'kgraph-edge--dim'); });
+          allGroups.forEach(function (g) { g.classList.remove('kgraph-group--dim'); });
+        });
+      });
+    });
+  })();
+</script>

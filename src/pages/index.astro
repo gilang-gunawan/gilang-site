@@ -1,6 +1,8 @@
 ---
 import { getCollection, render } from "astro:content";
 import BaseLayout from "../layouts/BaseLayout.astro";
+import GraphView from "../components/GraphView.astro";
+import LocalTimeWidget from "../components/LocalTimeWidget.astro";
 import { contact, getSocialLinks } from "../site.config";
 
 // Fetch home page content from pages collection
@@ -63,7 +65,7 @@ const latestPosts = allPosts
   .slice(0, 3);
 ---
 
-<BaseLayout title={title} description={description}>
+<BaseLayout title={title} description={description} showGraph={true}>
   <div class="hero hero-index">
     <div class="hero-wrapper">
       <div>
@@ -169,9 +171,22 @@ const latestPosts = allPosts
       </section>
     )
   }
+
+  <!-- Graph and accessories on the right panel -->
+  <div slot="graph-panel" class="graph-panel-content">
+    <GraphView posts={allPosts} projects={allProjects} />
+    <LocalTimeWidget />
+  </div>
 </BaseLayout>
 
 <style>
+  .graph-panel-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    width: 100%;
+  }
+
   .home-item time {
     font-size: 0.8rem;
   }

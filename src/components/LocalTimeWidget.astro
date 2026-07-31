@@ -1,0 +1,100 @@
+---
+/**
+ * LocalTimeWidget.astro
+ * Minimal timezone widget showing local time in Jakarta.
+ */
+
+// Generate build-time fallback so it doesn't flash "--:--"
+const buildTime = new Date().toLocaleTimeString("en-US", {
+  timeZone: "Asia/Jakarta",
+  hour: "2-digit",
+  minute: "2-digit",
+  second: "2-digit",
+  hour12: true,
+});
+---
+
+<div class="time-widget">
+  <!-- <div class="time-widget-icon">📌</div> -->
+  <div class="time-widget-text">
+    <div class="time-label">Jakarta, Indonesia</div>
+    <div class="time-value" id="jkt-time">{buildTime}</div>
+  </div>
+</div>
+
+<style>
+  .time-widget {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 2rem;
+    padding: 0.85rem 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius);
+    background: var(--color-bg);
+  }
+
+  .time-widget-icon {
+    font-size: 1.25rem;
+  }
+
+  .time-widget-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+  }
+
+  .time-label {
+    font-size: 0.7rem;
+    color: var(--color-text-muted);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .time-value {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--color-text);
+    font-variant-numeric: tabular-nums;
+  }
+</style>
+
+<script>
+  function initTimeWidget() {
+    const el = document.getElementById("jkt-time");
+    if (!el) return;
+
+    function update() {
+      if (!el) return;
+      const now = new Date();
+      const str = now.toLocaleTimeString("en-US", {
+        timeZone: "Asia/Jakarta",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: true,
+      });
+      el.textContent = str;
+    }
+
+    update();
+    // Update every second so it looks live
+    const interval = setInterval(update, 1000);
+
+    // Cleanup if Astro swaps the page
+    document.addEventListener(
+      "astro:before-swap",
+      () => clearInterval(interval),
+      { once: true },
+    );
+  }
+
+  // Run on first load and subsequent navigations (if ViewTransitions is used)
+  document.addEventListener("astro:page-load", initTimeWidget);
+
+  // Fallback for normal page load if Astro's page-load event already fired
+  if (document.readyState !== "loading") {
+    initTimeWidget();
+  }
+</script>
