@@ -22,7 +22,7 @@ const formattedDate = date.toLocaleDateString('en-US', {
 });
 ---
 
-<BaseLayout title={title} description={description} showTOC={true} headings={headings}>
+<BaseLayout title={title} description={description} showTOC={true} headings={headings} ogImage={`/og/projects/${project.id}.png`}>
   <article class="post-article">
     <!-- Project Header -->
     <header class="post-header">

@@ -28,7 +28,7 @@ const formattedUpdatedDate = updatedDate?.toLocaleDateString('en-US', {
 });
 ---
 
-<BaseLayout title={title} description={description} showTOC={true} headings={headings}>
+<BaseLayout title={title} description={description} showTOC={true} headings={headings} ogImage={`/og/blog/${post.id}.png`}>
   <article class="post-article">
     <!-- Post Header -->
     <header class="post-header">

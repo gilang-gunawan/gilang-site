@@ -10,6 +10,7 @@ interface Props {
   showTOC?: boolean;
   headings?: { depth: number; slug: string; text: string }[];
   showGraph?: boolean;
+  ogImage?: string;
 }
 
 const {
@@ -18,9 +19,11 @@ const {
   showTOC = false,
   headings = [],
   showGraph = false,
+  ogImage = '/og/home.png',
 } = Astro.props;
 
 const fullTitle = title === site.name ? site.name : `${title} — ${site.name}`;
+const ogImageUrl = new URL(ogImage, Astro.url);
 ---
 
 <!doctype html>
@@ -36,7 +39,10 @@ const fullTitle = title === site.name ? site.name : `${title} — ${site.name}`;
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content={site.url} />
+    <meta property="og:url" content={Astro.url} />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content={ogImageUrl} />
 
     <title>{fullTitle}</title>
 
