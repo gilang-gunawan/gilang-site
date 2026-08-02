@@ -1,6 +1,7 @@
 ---
 import Sidebar from '../components/Sidebar.astro';
 import TOC from '../components/TOC.astro';
+import Footer from '../components/Footer.astro';
 import '../styles/global.css';
 import site from '../content/config/site.json';
 
@@ -67,6 +68,7 @@ const ogImageUrl = new URL(ogImage, Astro.url);
         <main class="main-content" id="main-content">
           <slot />
         </main>
+        <Footer />
       </div>
 
       {showTOC && headings.length > 0 && (
