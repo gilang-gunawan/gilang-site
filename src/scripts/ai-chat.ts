@@ -246,7 +246,14 @@ export function initDedicatedChat() {
       });
 
       if (!response.ok || !response.body) {
-        throw new Error(`HTTP error ${response.status}`);
+        let serverError = '';
+        try {
+          const errData = await response.json();
+          if (errData && errData.error) serverError = errData.error;
+        } catch {
+          // Ignore
+        }
+        throw new Error(serverError || `Server error (status ${response.status})`);
       }
 
       const reader = response.body.getReader();
@@ -299,10 +306,10 @@ export function initDedicatedChat() {
       }
 
       history.push({ role: 'assistant', content: accumulatedResponse });
-    } catch (err) {
+    } catch (err: any) {
       console.error('Chat request error:', err);
-      assistantBubble.innerHTML =
-        '<span style="color: var(--theme-pink, #e53e3e);">Sorry, an error occurred while connecting to the AI service. Please try again in a moment.</span>';
+      const message = err?.message || 'Sorry, an error occurred while connecting to the AI service. Please try again in a moment.';
+      assistantBubble.innerHTML = `<span style="color: var(--theme-pink, #e53e3e);">${message}</span>`;
     } finally {
       isGenerating = false;
       if (sendBtn) sendBtn.disabled = false;

@@ -49,7 +49,7 @@ export async function onRequestPost(context: EventContext): Promise<Response> {
 
     const aiProvider = (env.AI_PROVIDER || 'gemini').toLowerCase();
     const geminiKey = env.GEMINI_API_KEY;
-    const geminiModel = env.GEMINI_MODEL || 'gemini-2.5-flash';
+    const geminiModel = env.GEMINI_MODEL || 'gemini-2.0-flash';
 
     const openaiKey = env.OPENAI_API_KEY;
     const openaiBaseUrl = env.OPENAI_BASE_URL || 'https://api.openai.com/v1';
