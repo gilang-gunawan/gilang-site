@@ -4,6 +4,7 @@ import { Resvg } from '@resvg/resvg-js';
 import { getCollection } from 'astro:content';
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import siteData from '../../content/config/site.json';
 
 // Define the paths we want to generate OG images for
 export async function getStaticPaths() {
@@ -11,7 +12,7 @@ export async function getStaticPaths() {
   const projectPosts = await getCollection('projects');
 
   const paths = [
-    { params: { route: 'home' }, props: { title: 'Gilang Gunawan', subtitle: 'Full-stack software engineer' } },
+    { params: { route: 'home' }, props: { title: siteData.name, subtitle: siteData.tagline } },
     { params: { route: 'blog' }, props: { title: 'Blog', subtitle: 'Articles, tutorials, and brain dumps.' } },
     { params: { route: 'projects' }, props: { title: 'Projects', subtitle: 'A selection of my recent work.' } },
     { params: { route: 'resume' }, props: { title: 'Resume', subtitle: 'My professional experience and skills.' } },
@@ -43,6 +44,15 @@ export async function GET({ props }: { props: { title: string; subtitle: string 
   
   const fontRegular = await fs.readFile(fontRegularPath);
   const fontSemiBold = await fs.readFile(fontSemiBoldPath);
+  const initials = siteData.name
+    ? siteData.name
+        .split(' ')
+        .map((w: string) => w[0])
+        .filter(Boolean)
+        .slice(0, 2)
+        .join('')
+        .toUpperCase()
+    : 'AI';
 
   const markup = html`
     <div
@@ -64,9 +74,9 @@ export async function GET({ props }: { props: { title: string; subtitle: string 
       <!-- Header -->
       <div style="display: flex; align-items: center; justify-content: flex-start; gap: 20px;">
         <div style="display: flex; align-items: center; justify-content: center; width: 80px; height: 80px; background-color: #171717; border-radius: 18px; color: #fafafa; font-size: 38px; font-weight: 600; padding-bottom: 4px;">
-          GG
+          ${initials}
         </div>
-        <span style="font-size: 32px; font-weight: 600; color: #a5b4fc;">gilang.web.id</span>
+        <span style="font-size: 32px; font-weight: 600; color: #a5b4fc;">${new URL(siteData.url).hostname}</span>
       </div>
 
       <!-- Main Content -->
@@ -80,12 +90,12 @@ export async function GET({ props }: { props: { title: string; subtitle: string 
       <!-- Footer -->
       <div style="display: flex; justify-content: space-between; align-items: center; border-top: 2px solid #323239; padding-top: 40px; width: 100%;">
         <div style="display: flex; align-items: center; gap: 16px;">
-          <span style="font-size: 28px; font-weight: 600; color: #e4e4e7;">Gilang Gunawan</span>
+          <span style="font-size: 28px; font-weight: 600; color: #e4e4e7;">${siteData.name}</span>
           <span style="font-size: 28px; color: #a1a1a8;">·</span>
-          <span style="font-size: 28px; font-weight: 400; color: #a1a1a8;">Full-stack engineer</span>
+          <span style="font-size: 28px; font-weight: 400; color: #a1a1a8;">${siteData.tagline.split('·')[0].trim()}</span>
         </div>
         <div style="display: flex; align-items: center;">
-          <span style="font-size: 28px; font-weight: 600; color: #a5b4fc;">gilang.web.id</span>
+          <span style="font-size: 28px; font-weight: 600; color: #a5b4fc;">${new URL(siteData.url).hostname}</span>
         </div>
       </div>
     </div>
