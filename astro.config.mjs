@@ -70,8 +70,8 @@ function devApiChatPlugin() {
                   const env = { ...process.env, ...loadedEnv };
                   
                   // Dynamically load the TypeScript edge handler via Vite SSR
-                  const chatModule = await server.ssrLoadModule('/functions/api/chat.ts');
-                  const response = await chatModule.onRequestPost({ request, env });
+                  const chatModule = await server.ssrLoadModule('/src/lib/chat-handler.ts');
+                  const response = await chatModule.handleChatRequest(request, env);
 
                   res.statusCode = response.status;
                   response.headers.forEach((/** @type {string} */ value, /** @type {string} */ key) => {
