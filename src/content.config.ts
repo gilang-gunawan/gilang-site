@@ -2,7 +2,7 @@ import { defineCollection, z } from "astro:content";
 import { glob } from "astro/loaders";
 
 // ── Blog collection ────────────────────────────────────────────────────────
-// Source: content/ submodule → gilang-content/blog/
+// Source: src/content/blog/
 const blog = defineCollection({
   loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/blog" }),
   schema: z.object({
@@ -16,7 +16,7 @@ const blog = defineCollection({
 });
 
 // ── Projects collection ────────────────────────────────────────────────────
-// Source: content/ submodule → gilang-content/projects/
+// Source: src/content/projects/
 const projects = defineCollection({
   loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/projects" }),
   schema: z.object({
@@ -33,7 +33,7 @@ const projects = defineCollection({
 });
 
 // ── Pages collection ───────────────────────────────────────────────────────
-// Source: content/ submodule → gilang-content/pages/
+// Source: src/content/pages/
 // Covers: home, about, resume
 const pages = defineCollection({
   loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/pages" }),

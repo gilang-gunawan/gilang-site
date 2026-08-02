@@ -116,30 +116,71 @@ Controls site metadata and social links displayed across the site:
 
 Leave any social field as an empty string `""` to hide it from the site.
 
+## AI Assistant
+
+This website includes a dedicated AI Assistant page (`/chat`) that acts as a natural language interface to the site's content, allowing visitors to ask questions about the owner's portfolio, articles, and work experience.
+
+### Grounding & Dynamic Pipeline
+
+The assistant is strictly grounded to avoid hallucinations and is designed to be fully customizable for forks/clones:
+
+*   **Zero-Config Knowledge & Suggestions Sync:** A node script (`scripts/generate-knowledge.js`) runs at build time to parse files under `src/content/`. It extracts text for RAG (Retrieval-Augmented Generation) and dynamically generates contextual chat suggestions based on current projects and blog posts.
+*   **Git-Clean Design:** The generated output (`src/lib/knowledge-generated.ts`) containing the personal content database is excluded from git tracking (`.gitignore`).
+*   **Forker-Friendly Installation:** A `postinstall` script runs the generator automatically during `npm install`. If the `src/content/` folder is empty (e.g., in a fresh clone), it gracefully writes a valid empty stub so the codebase compiles and builds out-of-the-box without TypeScript compiler errors.
+*   **Site Configuration Integration:** The system prompt and assistant responses adapt dynamically to the identity values defined in `src/content/config/site.json`.
+
+### Setup & Credentials
+
+To enable the assistant, you need to provide a Gemini API Key:
+
+1.  **Local Development:**
+    *   Create a `.env` file in the root directory:
+        ```env
+        GEMINI_API_KEY=your_gemini_api_key_here
+        ```
+    *   Restart the development server. If no key is set, the chat UI falls back gracefully to a prompt inviting you to read the resume/projects pages.
+2.  **Production Deployment:**
+    *   Add `GEMINI_API_KEY` to your environment variables in the Cloudflare Pages dashboard under **Settings → Environment variables** (for both preview and production environments).
+
+
 ## Local Development
 
-### 1. Clone with submodule
+> [!IMPORTANT]
+> The original `src/content` submodule is a **private repository**. When cloning this repository, do **not** use `--recurse-submodules` as it will fail due to lack of permissions. Follow the instructions below to set up your own content directory.
+
+### 1. Clone the repository
+
+Clone the site code directly without submodules:
 
 ```bash
-git clone --recurse-submodules https://github.com/gilang-gunawan/gilang-site.git
+git clone https://github.com/gilang-gunawan/gilang-site.git
 cd gilang-site
 ```
 
-If you already cloned without the flag:
+### 2. Initialize your own content
 
-```bash
-git submodule update --init --recursive
-```
+Since the original content repo is private, you need to create your own content structure. The easiest way is to set up a local content directory:
 
-> **Note:** The `src/content` submodule points to a private repository. If you're forking this project, you'll need to either create your own content repo and update `.gitmodules`, or remove the submodule and add a `src/content/` directory manually (see [Forking](#forking) below).
+1. Deinit the private submodule configuration so Git ignores it:
+   ```bash
+   git submodule deinit -f src/content
+   git rm -f src/content
+   rm -rf .git/modules/src/content
+   ```
+2. Create the directories:
+   ```bash
+   mkdir -p src/content/blog src/content/pages src/content/projects src/content/config src/content/assets
+   ```
+3. Create your site config at `src/content/config/site.json` following the [schema below](#configsitejson).
 
-### 2. Install dependencies
+### 3. Install dependencies & build stubs
 
 ```bash
 npm install
 ```
+*Note: Running `npm install` automatically triggers the postinstall sync script (`scripts/generate-knowledge.js`) which generates the TypeScript interfaces for the AI chat based on your local content.*
 
-### 3. Start the dev server
+### 4. Start the dev server
 
 ```bash
 npm run dev
@@ -157,31 +198,24 @@ The site will be available at `http://localhost:4321`.
 
 ## Forking
 
-Want to use this as a starting point for your own site? Here's how to set it up with your own content.
+Want to use this repository as a template for your own portfolio? Follow these steps to hook it up to your own content.
 
-### Option A — Use your own content submodule
+### Option A — Use a local content directory (Recommended & Simplest)
 
-1. Fork this repo on GitHub.
-2. Create a new repo for your content (e.g., `your-content`).
-3. Update `.gitmodules` to point to your content repo:
+Follow step 2 in [Local Development](#2-initialize-your-own-content) to strip the private submodule reference and create a local `src/content` directory. Committing your content directly to your own fork is the easiest way to manage a personal website.
+
+### Option B — Use your own content submodule
+
+If you prefer to separate your content from your site code:
+1. Create a new public or private repository on GitHub (e.g., `my-content`).
+2. Update `.gitmodules` in your forked site repo:
    ```ini
    [submodule "src/content"]
        path = src/content
-       url = https://github.com/yourusername/your-content.git
+       url = https://github.com/yourusername/my-content.git
    ```
-4. Run `git submodule sync && git submodule update --init` to re-link it.
-5. Populate your content repo using the frontmatter schemas described above.
-
-### Option B — Drop the submodule, use a local content directory
-
-1. Fork this repo.
-2. Remove the submodule:
-   ```bash
-   git submodule deinit -f src/content
-   git rm -f src/content
-   rm -rf .git/modules/src/content
-   ```
-3. Create `src/content/` manually and add your own `blog/`, `pages/`, `projects/`, and `config/site.json` following the schemas above.
+3. Run `git submodule sync && git submodule update --init` to link it.
+4. Populate your content repo using the schemas described above.
 
 ## Deployment
 

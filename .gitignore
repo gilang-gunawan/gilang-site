@@ -1,7 +1,13 @@
 # build output
 dist/
-# generated types
+# generated types & caches
 .astro/
+.wrangler/
+
+# AI knowledge base — generated from src/content at build time (like .env)
+# Run `npm install` or `npm run build` to regenerate.
+# @see scripts/generate-knowledge.js
+src/lib/knowledge-generated.ts
 
 # dependencies
 node_modules/
@@ -29,6 +35,7 @@ CLAUDE.md
 claude.md
 .cursor/
 .ai/
+.claude/
 *.log
 
 # vscode

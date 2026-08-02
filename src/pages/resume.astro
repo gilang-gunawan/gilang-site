@@ -32,7 +32,7 @@ const resumeContactItems = [
     <div class="prose">
       <div class="resume-contact">
         <p>
-          <a href={resumeUrl} download="Gilang_Gunawan_Resume_2026.pdf">📥 Download Resume (1-page PDF)</a>
+          <a href={resumeUrl} download={`${(site.name || 'Resume').replace(/\s+/g, '_')}_Resume.pdf`}>📥 Download Resume (1-page PDF)</a>
         </p>
         <p>
           {resumeContactItems.map((item, index) => (

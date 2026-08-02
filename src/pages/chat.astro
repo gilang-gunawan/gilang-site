@@ -1,0 +1,83 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getChatSuggestions } from '../lib/chat-suggestions';
+
+const suggestions = getChatSuggestions();
+---
+
+<BaseLayout title="Ask AI" description="AI assistant grounded on this site's portfolio and content.">
+  <article class="page-article chat-page-article">
+    <div class="chat-page-header">
+      <div class="chat-page-title-row">
+        <h1 class="chat-page-title">Ask AI</h1>
+        <div class="chat-page-status-badge">
+          <span class="chat-status-dot"></span>
+          <span class="chat-status-text" id="chat-status-indicator">Ready</span>
+        </div>
+      </div>
+      <p class="chat-page-subtitle">
+        Ask about this site's portfolio, projects, writing, and background.
+      </p>
+    </div>
+
+    <!-- Main Chat Component -->
+    <div class="dedicated-ai-chat" id="dedicated-ai-chat">
+
+      <!-- Chat Messages Container (suggestions live inside here as empty state) -->
+      <div class="chat-messages-container" id="chat-messages-container" role="log" aria-live="polite">
+        <!-- Empty state with inline suggestions -->
+        <div class="chat-empty-state" id="chat-empty-state">
+          <p class="chat-empty-text">Select a suggestion or type your question below.</p>
+          <div class="chat-suggestions-section">
+            <div class="chat-suggestions-label">Suggested questions</div>
+            <div class="chat-suggestions-grid">
+              {suggestions.map((item) => (
+                <button type="button" class="chat-suggestion-card" data-prompt={item.prompt}>
+                  <span class="chat-suggestion-icon">{item.icon}</span>
+                  <span class="chat-suggestion-text">{item.title}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chat Input Area -->
+      <div class="chat-input-section">
+        <form class="chat-main-form" id="chat-main-form" action="#">
+          <div class="chat-input-box">
+            <textarea
+              id="chat-user-input"
+              class="chat-main-textarea"
+              placeholder="Ask anything… (Enter to send)"
+              rows="1"
+              maxlength="1000"
+              aria-label="Type your message"
+            ></textarea>
+            <button type="submit" id="chat-send-btn" class="chat-send-button" aria-label="Send question">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <line x1="22" y1="2" x2="11" y2="13"/>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+              </svg>
+            </button>
+          </div>
+          <div class="chat-controls-footer">
+            <span class="chat-hint-text">Grounded on verified portfolio content</span>
+            <button type="button" id="chat-reset-button" class="chat-clear-btn hidden">
+              <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                <path d="M3 3v5h5"/>
+              </svg>
+              Clear
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </article>
+</BaseLayout>
+
+<script>
+  import { initDedicatedChat } from '../scripts/ai-chat';
+  initDedicatedChat();
+</script>
