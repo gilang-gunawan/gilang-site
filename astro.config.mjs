@@ -10,14 +10,22 @@ import path from 'node:path';
 import { buildKnowledgeFile } from './scripts/generate-knowledge.js';
 
 /**
- * Vite plugin to provide a fallback site.json if the content submodule is not checked out
+ * Vite plugin to provide site.json from LOCAL_CONTENT_PATH or a fallback if the content submodule is not checked out
  * @returns {import('vite').Plugin}
  */
 function fallbackSiteJsonPlugin() {
+  const env = loadEnv(process.env.NODE_ENV || 'development', process.cwd(), '');
+  const localContentPath = env.LOCAL_CONTENT_PATH;
   return {
     name: 'fallback-site-json',
     resolveId(id, importer) {
       if (id.includes('content/config') && id.endsWith('site.json')) {
+        if (localContentPath) {
+          const overridePath = path.join(localContentPath, 'config', 'site.json');
+          if (fs.existsSync(overridePath)) {
+            return overridePath;
+          }
+        }
         if (importer) {
           const resolvedPath = path.resolve(path.dirname(importer), id);
           if (!fs.existsSync(resolvedPath)) {
@@ -26,6 +34,12 @@ function fallbackSiteJsonPlugin() {
         }
       }
       if (id.includes('content/assets') && id.endsWith('.pdf')) {
+        if (localContentPath) {
+          const overridePath = path.join(localContentPath, 'assets', path.basename(id));
+          if (fs.existsSync(overridePath)) {
+            return overridePath;
+          }
+        }
         if (importer) {
           const resolvedPath = path.resolve(path.dirname(importer), id);
           if (!fs.existsSync(resolvedPath)) {
@@ -57,6 +71,9 @@ function fallbackSiteJsonPlugin() {
  * @returns {import('astro').AstroIntegration}
  */
 function knowledgeAutoSyncIntegration() {
+  const env = loadEnv(process.env.NODE_ENV || 'development', process.cwd(), '');
+  const localContentPath = env.LOCAL_CONTENT_PATH;
+
   return {
     name: 'knowledge-auto-sync',
     hooks: {
@@ -69,7 +86,11 @@ function knowledgeAutoSyncIntegration() {
       },
       'astro:server:setup': ({ server }) => {
         server.watcher.on('all', (event, filePath) => {
-          if (filePath && filePath.includes('/src/content/')) {
+          const isContentFile = filePath && (
+            filePath.includes('/src/content/') || 
+            (localContentPath && filePath.startsWith(localContentPath))
+          );
+          if (isContentFile) {
             try {
               buildKnowledgeFile();
             } catch (err) {
