@@ -159,8 +159,19 @@ cd gilang-site
 
 ### 2. Initialize your own content
 
-Since the original content repo is private, you need to create your own content structure. The easiest way is to set up a local content directory:
+Since the original content repo is private, you need to create your own content structure. There are two ways to do this:
 
+**Option A (Using `LOCAL_CONTENT_PATH` - Recommended):**
+Instead of modifying the submodule structure, point the site to a different content directory on your local machine using an environment variable.
+1. Create a `.env` file in the project root and set `LOCAL_CONTENT_PATH`:
+   ```env
+   LOCAL_CONTENT_PATH=/absolute/path/to/your/content/folder
+   ```
+2. Ensure that folder has the necessary structure (`blog`, `pages`, `projects`, `config`, `assets`).
+3. Create your site config at `config/site.json` inside that folder following the [schema below](#configsitejson).
+
+**Option B (Stripping the submodule):**
+If you prefer to put your content directly inside the repo:
 1. Deinit the private submodule configuration so Git ignores it:
    ```bash
    git submodule deinit -f src/content
@@ -200,9 +211,9 @@ The site will be available at `http://localhost:4321`.
 
 Want to use this repository as a template for your own portfolio? Follow these steps to hook it up to your own content.
 
-### Option A — Use a local content directory (Recommended & Simplest)
+### Option A — Use a local content directory (Recommended)
 
-Follow step 2 in [Local Development](#2-initialize-your-own-content) to strip the private submodule reference and create a local `src/content` directory. Committing your content directly to your own fork is the easiest way to manage a personal website.
+Follow step 2 in [Local Development](#2-initialize-your-own-content) to configure `LOCAL_CONTENT_PATH` or to strip the private submodule reference and create a local `src/content` directory. Either method allows you to easily manage your personal website's content.
 
 ### Option B — Use your own content submodule
 
