@@ -9,8 +9,8 @@ import { contact, getSocialLinks } from "../site.config";
 const allPages = await getCollection("pages");
 const homePage = allPages.find((p) => p.id === "home");
 
-const title = homePage?.data.title || 'Home';
-const description = homePage?.data.description || 'Welcome to my site';
+const title = homePage?.data.title || "Home";
+const description = homePage?.data.description || "Welcome to my site";
 const Content = homePage ? (await render(homePage)).Content : null;
 
 // Quick nav links below the intro, for fast access on mobile.
@@ -41,14 +41,14 @@ const links = [
     ? { label: "Email", href: `mailto:${contact.email}` }
     : undefined,
 ].filter((link): link is { label: string; href: string } =>
-  Boolean(link && link.href)
+  Boolean(link && link.href),
 );
 
 // Featured projects: prefer projects explicitly marked `featured`, otherwise
 // fall back to the 3 most recent.
 const allProjects = await getCollection("projects", ({ data }) => !data.draft);
 const sortedProjects = [...allProjects].sort(
-  (a, b) => (a.data.order ?? 999) - (b.data.order ?? 999)
+  (a, b) => (a.data.order ?? 999) - (b.data.order ?? 999),
 );
 const featuredProjects = sortedProjects.filter((p) => p.data.featured);
 const projectsToShow = (
@@ -70,16 +70,26 @@ const latestPosts = allPosts
 
         <!-- Prose bio from MDX body -->
         <div class="hero-description">
-          {Content ? <Content /> : <p>Welcome to my site. The content submodule is currently empty.</p>}
+          {
+            Content ? (
+              <Content />
+            ) : (
+              <p>
+                Welcome to my site. The content submodule is currently empty.
+              </p>
+            )
+          }
         </div>
 
         <div class="large-links">
-          {quickLinks.map((link) => (
-            <a href={link.href} class="large-link">
-              <Fragment set:html={link.icon} />
-              {link.label}
-            </a>
-          ))}
+          {
+            quickLinks.map((link) => (
+              <a href={link.href} class="large-link">
+                <Fragment set:html={link.icon} />
+                {link.label}
+              </a>
+            ))
+          }
         </div>
       </div>
     </div>
@@ -155,9 +165,7 @@ const latestPosts = allPosts
               href={link.href}
               target={link.href.startsWith("http") ? "_blank" : undefined}
               rel={
-                link.href.startsWith("http")
-                  ? "noopener noreferrer"
-                  : undefined
+                link.href.startsWith("http") ? "noopener noreferrer" : undefined
               }
               class="large-link"
             >

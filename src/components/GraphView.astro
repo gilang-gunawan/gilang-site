@@ -1,10 +1,9 @@
 ---
 /**
  * GraphView.astro — Build-time knowledge graph, zero runtime JS weight.
- *
  * Force-directed layout computed in TypeScript at `astro build` time.
  * Outputs a static SVG embedded in HTML. Zero external libraries.
- * Hover edge highlighting: deferred inline script, ~300 bytes.
+ * This version uses an organic circular constraint instead of a rectangular box.
  */
 
 interface Props {
@@ -29,7 +28,6 @@ interface GEdge { source: string; target: string; }
 const nodes: GNode[] = [];
 const edges: GEdge[] = [];
 
-// Count tag frequency across all content
 const tagFreq = new Map<string, number>();
 for (const item of [...posts, ...projects]) {
   for (const tag of item.data.tags ?? []) {
@@ -37,7 +35,6 @@ for (const item of [...posts, ...projects]) {
   }
 }
 
-// Only include tags shared by 2+ items — creates meaningful connections
 const sharedTags = new Set(
   [...tagFreq.entries()].filter(([, n]) => n >= 1).map(([t]) => t),
 );
@@ -46,7 +43,6 @@ function clip(s: string, max = 16): string {
   return s.length > max ? s.slice(0, max - 1) + '\u2026' : s;
 }
 
-// Post nodes
 for (const post of posts) {
   const id = `p__${post.id}`;
   nodes.push({ id, kind: 'post', label: clip(post.data.title), href: `/blog/${post.id}`, x:0, y:0, vx:0, vy:0 });
@@ -55,7 +51,6 @@ for (const post of posts) {
   }
 }
 
-// Project nodes
 for (const project of projects) {
   const id = `r__${project.id}`;
   nodes.push({ id, kind: 'project', label: clip(project.data.title), href: `/projects/${project.id}`, x:0, y:0, vx:0, vy:0 });
@@ -64,16 +59,14 @@ for (const project of projects) {
   }
 }
 
-// Shared tag nodes
 for (const tag of sharedTags) {
   nodes.push({ id: `t__${tag}`, kind: 'tag', label: tag, x:0, y:0, vx:0, vy:0 });
 }
 
-// ── Force-directed layout (runs at build time, ~2ms) ──────────────────────────
+// ── Force-directed layout (Organic circular bounds) ────────────────────────────
 
 const SVG_W = 252, SVG_H = 350, PAD = 34;
 
-// Deterministic seeded random — same layout on every build
 let _seed = 0x9e3779b9;
 function rng(): number {
   _seed ^= _seed << 13; _seed ^= _seed >>> 17; _seed ^= _seed << 5;
@@ -103,23 +96,34 @@ for (let it = 0; it < 280; it++) {
     }
   }
 
-  // Spring attraction (target: 70px)
+  // Spring attraction (target: 60px)
   for (const e of edges) {
     const A = nmap.get(e.source)!, B = nmap.get(e.target)!;
     if (!A || !B) continue;
     const dx = B.x - A.x, dy = B.y - A.y;
     const dist = Math.sqrt(dx*dx + dy*dy) + 0.1;
-    const f = ((dist - 70) * 0.07) * alpha;
+    const f = ((dist - 60) * 0.07) * alpha;
     A.vx += (dx/dist)*f; A.vy += (dy/dist)*f;
     B.vx -= (dx/dist)*f; B.vy -= (dy/dist)*f;
   }
 
-  // Center gravity + clamp
+  // Center gravity + circular clamp
+  const cx = SVG_W/2, cy = SVG_H/2;
+  const maxR = Math.min(SVG_W, SVG_H) / 2 - (PAD * 0.5);
+  
   for (const n of nodes) {
-    n.vx += (SVG_W/2 - n.x) * 0.025 * alpha;
-    n.vy += (SVG_H/2 - n.y) * 0.025 * alpha;
-    n.x = Math.max(PAD, Math.min(SVG_W - PAD, n.x + n.vx));
-    n.y = Math.max(PAD, Math.min(SVG_H - PAD, n.y + n.vy));
+    n.vx += (cx - n.x) * 0.03 * alpha;
+    n.vy += (cy - n.y) * 0.03 * alpha;
+    
+    n.x += n.vx;
+    n.y += n.vy;
+
+    const dx = n.x - cx, dy = n.y - cy;
+    const d = Math.sqrt(dx*dx + dy*dy) || 0.1;
+    if (d > maxR) {
+        n.x = cx + (dx/d) * maxR;
+        n.y = cy + (dy/d) * maxR;
+    }
   }
 }
 
@@ -136,7 +140,7 @@ function sid(id: string): string { return id.replace(/[^a-zA-Z0-9]/g, '_'); }
       viewBox={`0 0 ${SVG_W} ${SVG_H}`}
       width={SVG_W}
       height={SVG_H}
-      aria-label={`Knowledge graph — ${nodes.length} nodes, ${edges.length} connections`}
+      aria-label={`Knowledge graph organic — ${nodes.length} nodes, ${edges.length} connections`}
       role="img"
     >
       <g class="kgraph-edges" aria-hidden="true">
@@ -207,7 +211,6 @@ function sid(id: string): string { return id.replace(/[^a-zA-Z0-9]/g, '_'); }
 )}
 
 <script>
-  // Hover edge highlighting — deferred (Astro module script), does NOT block render
   (function () {
     document.querySelectorAll('.kgraph-svg').forEach(function (svg) {
       const allEdges = svg.querySelectorAll<SVGLineElement>('.kgraph-edge');

@@ -554,8 +554,9 @@ a.kgraph-group {
 .kgraph-legend {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 0.35rem 0.65rem;
-  margin-top: 0.25rem;
+  margin-top: -0.5rem;
 }
 
 .kgraph-legend-item {
