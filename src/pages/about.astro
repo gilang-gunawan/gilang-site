@@ -5,12 +5,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 const allPages = await getCollection('pages');
 const aboutPage = allPages.find((p) => p.id === 'about');
 
-if (!aboutPage) {
-  throw new Error('Missing content/pages/about.mdx in the content submodule.');
-}
-
-const { title, description } = aboutPage.data;
-const { Content, headings } = await render(aboutPage);
+const title = aboutPage?.data.title || 'About';
+const description = aboutPage?.data.description || 'About this site';
+const headings = aboutPage ? (await render(aboutPage)).headings : [];
+const Content = aboutPage ? (await render(aboutPage)).Content : null;
 ---
 
 <BaseLayout title={title} description={description} showTOC={true} headings={headings}>
@@ -18,7 +16,7 @@ const { Content, headings } = await render(aboutPage);
     <h1>{title}</h1>
 
     <div class="prose">
-      <Content />
+      {Content ? <Content /> : <p>Content coming soon. The content submodule is currently empty.</p>}
     </div>
   </article>
 </BaseLayout>

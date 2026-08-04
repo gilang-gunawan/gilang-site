@@ -9,12 +9,10 @@ import resumeUrl from '../content/assets/gilang-gunawan-resume-2026.pdf';
 const allPages = await getCollection('pages');
 const resumePage = allPages.find((p) => p.id === 'resume');
 
-if (!resumePage) {
-  throw new Error('Missing content/pages/resume.mdx in the content submodule.');
-}
-
-const { title, description } = resumePage.data;
-const { Content, headings } = await render(resumePage);
+const title = resumePage?.data.title || 'Resume';
+const description = resumePage?.data.description || 'Resume';
+const headings = resumePage ? (await render(resumePage)).headings : [];
+const Content = resumePage ? (await render(resumePage)).Content : null;
 
 const socialLinks = getSocialLinks();
 const resumeContactItems = [
@@ -53,7 +51,7 @@ const resumeContactItems = [
           ))}
         </p>
       </div>
-      <Content />
+      {Content ? <Content /> : <p>Content coming soon. The content submodule is currently empty.</p>}
     </div>
   </article>
 </BaseLayout>

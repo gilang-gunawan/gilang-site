@@ -9,12 +9,9 @@ import { contact, getSocialLinks } from "../site.config";
 const allPages = await getCollection("pages");
 const homePage = allPages.find((p) => p.id === "home");
 
-if (!homePage) {
-  throw new Error("Missing content/pages/home.mdx in the content submodule.");
-}
-
-const { title, description } = homePage.data;
-const { Content } = await render(homePage);
+const title = homePage?.data.title || 'Home';
+const description = homePage?.data.description || 'Welcome to my site';
+const Content = homePage ? (await render(homePage)).Content : null;
 
 // Quick nav links below the intro, for fast access on mobile.
 // Icons match the ones used for these destinations in the sidebar nav.
@@ -73,7 +70,7 @@ const latestPosts = allPosts
 
         <!-- Prose bio from MDX body -->
         <div class="hero-description">
-          <Content />
+          {Content ? <Content /> : <p>Welcome to my site. The content submodule is currently empty.</p>}
         </div>
 
         <div class="large-links">

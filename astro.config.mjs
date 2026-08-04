@@ -5,7 +5,52 @@ import tailwindcss from '@tailwindcss/vite';
 import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 import { loadEnv } from 'vite';
+import fs from 'node:fs';
+import path from 'node:path';
 import { buildKnowledgeFile } from './scripts/generate-knowledge.js';
+
+/**
+ * Vite plugin to provide a fallback site.json if the content submodule is not checked out
+ * @returns {import('vite').Plugin}
+ */
+function fallbackSiteJsonPlugin() {
+  return {
+    name: 'fallback-site-json',
+    resolveId(id, importer) {
+      if (id.includes('content/config') && id.endsWith('site.json')) {
+        if (importer) {
+          const resolvedPath = path.resolve(path.dirname(importer), id);
+          if (!fs.existsSync(resolvedPath)) {
+            return '\\0virtual:site.json';
+          }
+        }
+      }
+      if (id.includes('content/assets') && id.endsWith('.pdf')) {
+        if (importer) {
+          const resolvedPath = path.resolve(path.dirname(importer), id);
+          if (!fs.existsSync(resolvedPath)) {
+            return '\\0virtual:missing-pdf';
+          }
+        }
+      }
+      return null;
+    },
+    load(id) {
+      if (id === '\\0virtual:site.json') {
+        return JSON.stringify({ 
+          name: "Fallback Site", 
+          tagline: "Fallback Tagline", 
+          url: "https://example.com", 
+          contact: {} 
+        });
+      }
+      if (id === '\\0virtual:missing-pdf') {
+        return 'export default "/missing-asset.pdf";';
+      }
+      return null;
+    },
+  };
+}
 
 /**
  * Astro integration to automatically compile AI knowledge from src/content on build and dev
@@ -111,7 +156,7 @@ export default defineConfig({
   site: 'https://gilang.web.id',
 
   vite: {
-    plugins: [tailwindcss(), devApiChatPlugin()],
+    plugins: [tailwindcss(), devApiChatPlugin(), fallbackSiteJsonPlugin()],
   },
 
   integrations: [mdx(), sitemap(), knowledgeAutoSyncIntegration()],
