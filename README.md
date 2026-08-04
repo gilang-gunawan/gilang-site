@@ -165,7 +165,7 @@ Since the original content repo is private, you need to create your own content 
 Instead of modifying the submodule structure, point the site to a different content directory on your local machine using an environment variable.
 1. Create a `.env` file in the project root and set `LOCAL_CONTENT_PATH`:
    ```env
-   LOCAL_CONTENT_PATH=/absolute/path/to/your/content/folder
+   LOCAL_CONTENT_PATH="/absolute/path/to/your/content/folder"
    ```
 2. Ensure that folder has the necessary structure (`blog`, `pages`, `projects`, `config`, `assets`).
 3. Create your site config at `config/site.json` inside that folder following the [schema below](#configsitejson).
