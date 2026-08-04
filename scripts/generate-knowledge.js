@@ -1,6 +1,10 @@
 // @ts-check
 import fs from 'node:fs';
 import path from 'node:path';
+import { loadEnv } from 'vite';
+
+const env = loadEnv(process.env.NODE_ENV || 'development', process.cwd(), '');
+const LOCAL_CONTENT_PATH = env.LOCAL_CONTENT_PATH;
 
 /**
  * Strips MDX/JSX tags and normalizes markdown text for AI context ingestion
@@ -93,7 +97,7 @@ const CATEGORY_ICONS = {
  * @returns {Array<{icon: string, title: string, prompt: string}>}
  */
 export function generateChatSuggestions(rootDir = process.cwd()) {
-  const contentDir = path.join(rootDir, 'src', 'content');
+  const contentDir = LOCAL_CONTENT_PATH || path.join(rootDir, 'src', 'content');
   const siteJsonPath = path.join(contentDir, 'config', 'site.json');
 
   /** @type {{ name?: string }} */
@@ -157,7 +161,7 @@ export function generateChatSuggestions(rootDir = process.cwd()) {
  * @returns {string}
  */
 export function generateKnowledge(rootDir = process.cwd()) {
-  const contentDir = path.join(rootDir, 'src', 'content');
+  const contentDir = LOCAL_CONTENT_PATH || path.join(rootDir, 'src', 'content');
   let output = `# COMPREHENSIVE KNOWLEDGE BASE\n\n`;
   output += `> Automatically synchronized from content files at build time.\n\n`;
 
@@ -229,7 +233,7 @@ export function generateKnowledge(rootDir = process.cwd()) {
  * @param {string} rootDir
  */
 export function buildKnowledgeFile(rootDir = process.cwd()) {
-  const contentDir = path.join(rootDir, 'src', 'content');
+  const contentDir = LOCAL_CONTENT_PATH || path.join(rootDir, 'src', 'content');
   const hasContent = fs.existsSync(contentDir) &&
     ['pages', 'projects', 'blog'].some((sub) => {
       const dir = path.join(contentDir, sub);

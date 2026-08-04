@@ -1,10 +1,15 @@
 import { defineCollection, z } from "astro:content";
 import { glob } from "astro/loaders";
+import { loadEnv } from "vite";
+
+// Load environment variables manually since this file is loaded very early
+const env = loadEnv(process.env.NODE_ENV || 'development', process.cwd(), '');
+const contentBase = env.LOCAL_CONTENT_PATH || "./src/content";
 
 // ── Blog collection ────────────────────────────────────────────────────────
 // Source: src/content/blog/
 const blog = defineCollection({
-  loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/blog" }),
+  loader: glob({ pattern: "**/*.{md,mdx}", base: `${contentBase}/blog` }),
   schema: z.object({
     title: z.string(),
     description: z.string(),
@@ -18,7 +23,7 @@ const blog = defineCollection({
 // ── Projects collection ────────────────────────────────────────────────────
 // Source: src/content/projects/
 const projects = defineCollection({
-  loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/projects" }),
+  loader: glob({ pattern: "**/*.{md,mdx}", base: `${contentBase}/projects` }),
   schema: z.object({
     title: z.string(),
     description: z.string(),
@@ -37,7 +42,7 @@ const projects = defineCollection({
 // Source: src/content/pages/
 // Covers: home, about, resume
 const pages = defineCollection({
-  loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/pages" }),
+  loader: glob({ pattern: "**/*.{md,mdx}", base: `${contentBase}/pages` }),
   schema: z.object({
     title: z.string(),
     description: z.string().optional(),
