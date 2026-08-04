@@ -584,6 +584,11 @@ a.kgraph-group {
 .main-content {
   max-width: var(--content-width);
   padding: var(--layout-padding-vertical) var(--layout-padding-horizontal);
+  width: 100%;
+}
+
+.main-content.full-width {
+  max-width: 100%;
 }
 
 /* ─── TOC Panel (floating like sidebar) ──────────────────────────────────────── */
@@ -1378,25 +1383,6 @@ blockquote :last-child {
     color: var(--color-text-emphasized);
     font-weight: 700;
 }
-}
-
-/* Unlayered on purpose: @tailwindcss/typography's prose rules live in
-   @layer utilities, which always wins over @layer components regardless
-   of selector specificity. Styles outside any @layer beat both. */
-.prose .compact-list p {
-  margin: 0.25rem 0 0.125rem;
-}
-
-.prose .compact-list p:first-child {
-  margin-top: 0;
-}
-
-.prose .compact-list ul {
-  margin: 0 0 0.625rem;
-}
-
-.prose .compact-list li {
-  margin: 0;
 }
 
 /* ─── Footer ─────────────────────────────────────────────────────────────────── */

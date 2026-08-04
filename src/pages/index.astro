@@ -51,7 +51,7 @@ const links = [
 // fall back to the 3 most recent.
 const allProjects = await getCollection("projects", ({ data }) => !data.draft);
 const sortedProjects = [...allProjects].sort(
-  (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
+  (a, b) => (a.data.order ?? 999) - (b.data.order ?? 999)
 );
 const featuredProjects = sortedProjects.filter((p) => p.data.featured);
 const projectsToShow = (

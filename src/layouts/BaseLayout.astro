@@ -12,6 +12,7 @@ interface Props {
   headings?: { depth: number; slug: string; text: string }[];
   showGraph?: boolean;
   ogImage?: string;
+  fullWidth?: boolean;
 }
 
 const {
@@ -21,6 +22,7 @@ const {
   headings = [],
   showGraph = false,
   ogImage = '/og/home.png',
+  fullWidth = false,
 } = Astro.props;
 
 const fullTitle = title === site.name ? site.name : `${title} — ${site.name}`;
@@ -65,7 +67,7 @@ const ogImageUrl = new URL(ogImage, Astro.url);
       <Sidebar />
 
       <div class="main-wrapper">
-        <main class="main-content" id="main-content">
+        <main class:list={['main-content', { 'full-width': fullWidth }]} id="main-content">
           <slot />
         </main>
         <Footer />
