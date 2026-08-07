@@ -1,4 +1,5 @@
-@import url("https://fonts.googleapis.com/css2?family=Google+Sans+Code:ital,wght@0,300..800;1,300..800&family=Outfit:wght@100..900&display=swap");
+@import "@fontsource-variable/outfit";
+@import "@fontsource-variable/google-sans-code";
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
@@ -37,10 +38,10 @@
   --font-family:
     -apple-system, BlinkMacSystemFont, Avenir, Helvetica, Arial, sans-serif;
   --font-family-heading:
-    "Outfit", -apple-system, BlinkMacSystemFont, "DM Sans", Avenir, Helvetica,
+    "Outfit Variable", "Outfit", -apple-system, BlinkMacSystemFont, "DM Sans", Avenir, Helvetica,
     Arial, sans-serif;
-  --font-family-monospace: Menlo, "Google Sans Code", monospace;
-  --font-family-monospace2: "Google Sans Code", monospace;
+  --font-family-monospace: Menlo, "Google Sans Code Variable", "Google Sans Code", monospace;
+  --font-family-monospace2: "Google Sans Code Variable", "Google Sans Code", monospace;
 
   /* Layout */
   --border-radius: 6px;
