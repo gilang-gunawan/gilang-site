@@ -1666,10 +1666,6 @@ a.large-link:hover,
 }
 
 /* ─── Dedicated AI Chat Page ─────────────────────────────────────────── */
-.chat-page-article {
-  max-width: 820px;
-}
-
 .chat-page-header {
   margin-bottom: 1.5rem;
 }
