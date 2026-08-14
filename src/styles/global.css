@@ -1544,6 +1544,12 @@ time {
   padding-top: 1.5rem;
 }
 
+.post-comments {
+  border-top: 1px solid var(--color-border);
+  margin-top: 3rem;
+  padding-top: 2rem;
+}
+
 /* ─── About / Skills section ─────────────────────────────────────────────────── */
 .skills-section h2 {
   font-size: 0.75rem;
