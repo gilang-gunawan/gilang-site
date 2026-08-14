@@ -66,6 +66,7 @@
       document.querySelectorAll('[data-icon-sun]').forEach(el => el.classList.add('hidden'));
       document.querySelectorAll('[data-icon-moon]').forEach(el => el.classList.remove('hidden'));
     }
+    window.dispatchEvent(new CustomEvent('theme-change', { detail: { theme } }));
   }
 
   // Apply correct theme on load

@@ -1,0 +1,64 @@
+---
+// Giscus.astro — GitHub Discussions-powered comments (https://giscus.app)
+//
+// Configured entirely via env vars (see .env.example) so forks don't inherit the
+// upstream owner's repo/category IDs. Renders nothing if unconfigured.
+//
+// To get these values for your own fork: enable Discussions on your repo, install
+// the giscus app (https://github.com/apps/giscus), then fetch the IDs with:
+//   gh api graphql -f query='{ repository(owner:"OWNER", name:"REPO") {
+//     id discussionCategories(first:20) { nodes { id name } } } }'
+const REPO = import.meta.env.GISCUS_REPO;
+const REPO_ID = import.meta.env.GISCUS_REPO_ID;
+const CATEGORY = import.meta.env.GISCUS_CATEGORY || 'Announcements';
+const CATEGORY_ID = import.meta.env.GISCUS_CATEGORY_ID;
+
+const enabled = Boolean(REPO && REPO_ID && CATEGORY_ID);
+---
+
+{enabled && (
+  <Fragment>
+    <section
+      class="post-comments"
+      id="giscus-comments"
+      data-giscus-repo={REPO}
+      data-giscus-repo-id={REPO_ID}
+      data-giscus-category={CATEGORY}
+      data-giscus-category-id={CATEGORY_ID}
+      aria-label="Comments"
+    >
+    </section>
+
+    <script>
+      function loadGiscus(container: HTMLElement) {
+        const theme = document.documentElement.classList.contains('is-dark') ? 'dark' : 'light';
+        const script = document.createElement('script');
+        script.src = 'https://giscus.app/client.js';
+        script.setAttribute('data-repo', container.dataset.giscusRepo!);
+        script.setAttribute('data-repo-id', container.dataset.giscusRepoId!);
+        script.setAttribute('data-category', container.dataset.giscusCategory!);
+        script.setAttribute('data-category-id', container.dataset.giscusCategoryId!);
+        script.setAttribute('data-mapping', 'pathname');
+        script.setAttribute('data-strict', '0');
+        script.setAttribute('data-reactions-enabled', '1');
+        script.setAttribute('data-emit-metadata', '0');
+        script.setAttribute('data-input-position', 'top');
+        script.setAttribute('data-theme', theme);
+        script.setAttribute('data-lang', 'en');
+        script.setAttribute('crossorigin', 'anonymous');
+        script.async = true;
+        container.appendChild(script);
+      }
+
+      const container = document.getElementById('giscus-comments');
+      if (container) loadGiscus(container);
+
+      // Keep the embedded iframe's theme in sync with the site's own dark/light toggle.
+      window.addEventListener('theme-change', (e) => {
+        const theme = (e as CustomEvent<{ theme: 'dark' | 'light' }>).detail.theme;
+        const iframe = document.querySelector<HTMLIFrameElement>('iframe.giscus-frame');
+        iframe?.contentWindow?.postMessage({ giscus: { setConfig: { theme } } }, 'https://giscus.app');
+      });
+    </script>
+  </Fragment>
+)}
