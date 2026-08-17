@@ -27,14 +27,7 @@ const MIME_TYPES = {
     '.woff2': 'font/woff2',
 };
 
-async function serveStatic(pathname, res) {
-    let filePath = join(DIST_DIR, decodeURIComponent(pathname));
-
-    // Directory or extensionless request -> try index.html
-    if (pathname.endsWith('/') || !extname(filePath)) {
-        filePath = join(filePath, pathname.endsWith('/') ? 'index.html' : '', pathname.endsWith('/') ? '' : '.html');
-    }
-
+async function tryFile(filePath, res) {
     try {
         const data = await readFile(filePath);
         const ext = extname(filePath);
@@ -44,6 +37,27 @@ async function serveStatic(pathname, res) {
     } catch {
         return false;
     }
+}
+
+async function serveStatic(pathname, res) {
+    const decoded = decodeURIComponent(pathname);
+    const base = join(DIST_DIR, decoded);
+
+    // 1. Exact file match (e.g. /favicon.svg, /assets/foo.js)
+    if (extname(base)) {
+        if (await tryFile(base, res)) return true;
+    }
+
+    // 2. Directory index (e.g. /about/ -> /about/index.html)
+    if (await tryFile(join(base, 'index.html'), res)) return true;
+
+    // 3. Route without trailing slash (e.g. /about -> /about/index.html or /about.html)
+    if (!decoded.endsWith('/')) {
+        if (await tryFile(join(DIST_DIR, decoded, 'index.html'), res)) return true;
+        if (await tryFile(`${base}.html`, res)) return true;
+    }
+
+    return false;
 }
 
 const server = createServer(async (req, res) => {
@@ -89,13 +103,13 @@ const server = createServer(async (req, res) => {
         return;
     }
 
-    // Static assets
-    const servedIndex = await serveStatic(url.pathname, res);
-    if (servedIndex) return;
+    // Static assets / pages
+    const served = await serveStatic(url.pathname, res);
+    if (served) return;
 
-    // SPA-style fallback -> try index.html at that path, else root index.html
-    const servedFallback = await serveStatic('/index.html', res);
-    if (!servedFallback) {
+    // True 404 — don't fallback to index.html for a multi-page static site
+    const notFoundServed = await tryFile(join(DIST_DIR, '404.html'), res);
+    if (!notFoundServed) {
         res.writeHead(404, { 'Content-Type': 'text/plain' });
         res.end('Not Found');
     }
