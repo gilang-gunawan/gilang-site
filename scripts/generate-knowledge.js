@@ -92,7 +92,9 @@ const CATEGORY_ICONS = {
 };
 
 /**
- * Generates dynamic chat suggestions from content collections
+ * Generates dynamic chat suggestions from content collections.
+ * Always leads with 4 static HR-persona cards (useful for recruiters and hiring managers),
+ * followed by up to 2 dynamic project/blog cards, then a contact card.
  * @param {string} rootDir
  * @returns {Array<{icon: string, title: string, prompt: string}>}
  */
@@ -107,12 +109,38 @@ export function generateChatSuggestions(rootDir = process.cwd()) {
   /** @type {Array<{icon: string, title: string, prompt: string}>} */
   const suggestions = [];
 
-  // 1. Project-derived suggestions
+  // 1. Static HR-persona suggestions — always shown first regardless of content.
+  //    These surface the hiring-critical information recruiters and hiring managers need.
+  suggestions.push(
+    {
+      icon: '👤',
+      title: 'Experience & Background',
+      prompt: `What is ${ownerName}'s professional background, total years of experience, and the types of systems they have built?`,
+    },
+    {
+      icon: '💼',
+      title: 'Availability & Opportunities',
+      prompt: `Is ${ownerName} currently open to new opportunities? What types of roles and work arrangements are they considering?`,
+    },
+    {
+      icon: '🛠️',
+      title: 'Tech Stack & Skills',
+      prompt: `What are ${ownerName}'s core technical skills, programming languages, and primary frameworks?`,
+    },
+    {
+      icon: '🏆',
+      title: 'Key Achievements',
+      prompt: `What are ${ownerName}'s most impactful professional achievements and measurable results?`,
+    }
+  );
+
+  // 2. Dynamic project-derived suggestions (up to 2, as supporting detail)
   const projectsDir = path.join(contentDir, 'projects');
   if (fs.existsSync(projectsDir)) {
     const files = fs.readdirSync(projectsDir).filter((f) => f.endsWith('.md') || f.endsWith('.mdx'));
+    let added = 0;
     for (const file of files) {
-      if (suggestions.length >= 4) break;
+      if (added >= 2) break;
       const raw = fs.readFileSync(path.join(projectsDir, file), 'utf-8');
       const { data } = parseFrontmatter(raw);
       if (data.draft) continue;
@@ -124,15 +152,15 @@ export function generateChatSuggestions(rootDir = process.cwd()) {
         title: data.title,
         prompt: `Tell me about the ${data.title} project — what was built, what technical challenges were solved, and what the impact was.`,
       });
+      added++;
     }
   }
 
-  // 2. Blog-derived suggestions
+  // 3. Dynamic blog-derived suggestions (up to 1)
   const blogDir = path.join(contentDir, 'blog');
   if (fs.existsSync(blogDir)) {
     const files = fs.readdirSync(blogDir).filter((f) => f.endsWith('.md') || f.endsWith('.mdx'));
     for (const file of files) {
-      if (suggestions.length >= 6) break;
       const raw = fs.readFileSync(path.join(blogDir, file), 'utf-8');
       const { data } = parseFrontmatter(raw);
       if (data.draft) continue;
@@ -142,10 +170,11 @@ export function generateChatSuggestions(rootDir = process.cwd()) {
         title: data.title,
         prompt: `Can you summarize the blog post "${data.title}" and the key takeaways from it?`,
       });
+      break; // only 1 blog suggestion
     }
   }
 
-  // 3. Always append generic contact suggestion
+  // 4. Always append contact/opportunities card last
   suggestions.push({
     icon: '📬',
     title: 'Contact & Opportunities',
