@@ -1,5 +1,4 @@
 [submodule "src/content"]
 	path = src/content
-	url = https://github.com/gilang-gunawan/gilang-content.git
+	url = git@github.com:gilang-gunawan/gilang-content.git
 	ignore = all
-
