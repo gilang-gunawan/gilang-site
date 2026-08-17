@@ -16,6 +16,23 @@ export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
 
+    // Route /health
+    if (url.pathname === '/health') {
+      if (request.method === 'GET' || request.method === 'HEAD') {
+        return new Response(
+          request.method === 'HEAD' ? null : JSON.stringify({ status: 'ok', timestamp: new Date().toISOString() }),
+          {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' },
+          }
+        );
+      }
+      return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+        status: 405,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
     // Route /api/chat
     if (url.pathname === '/api/chat') {
       if (request.method === 'POST') {

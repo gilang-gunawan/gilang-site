@@ -118,6 +118,17 @@ function devApiChatPlugin() {
          * @param {() => void} next
          */
         async (req, res, next) => {
+          if (req.url === '/health' && (req.method === 'GET' || req.method === 'HEAD')) {
+            res.statusCode = 200;
+            res.setHeader('Content-Type', 'application/json');
+            if (req.method === 'HEAD') {
+              res.end();
+            } else {
+              res.end(JSON.stringify({ status: 'ok', timestamp: new Date().toISOString() }));
+            }
+            return;
+          }
+
           if (req.url === '/api/chat' && req.method === 'POST') {
             try {
               let body = '';

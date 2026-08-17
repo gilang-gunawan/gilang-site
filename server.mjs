@@ -63,6 +63,22 @@ async function serveStatic(pathname, res) {
 const server = createServer(async (req, res) => {
     const url = new URL(req.url, `http://${req.headers.host}`);
 
+    // Route: /health
+    if (url.pathname === '/health') {
+        if (req.method === 'GET' || req.method === 'HEAD') {
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            if (req.method === 'HEAD') {
+                res.end();
+            } else {
+                res.end(JSON.stringify({ status: 'ok', timestamp: new Date().toISOString() }));
+            }
+            return;
+        }
+        res.writeHead(405, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'Method not allowed' }));
+        return;
+    }
+
     // Route: /api/chat
     if (url.pathname === '/api/chat') {
         if (req.method !== 'POST') {
