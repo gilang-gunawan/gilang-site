@@ -143,7 +143,7 @@ export function generateChatSuggestions(rootDir = process.cwd()) {
       .filter((f) => f.endsWith('.md') || f.endsWith('.mdx'))
       .map((f) => parseFrontmatter(fs.readFileSync(path.join(projectsDir, f), 'utf-8')).data)
       .filter((data) => !data.draft)
-      .sort((a, b) => (b.featured === true) - (a.featured === true) || (Number(a.order) || 999) - (Number(b.order) || 999));
+      .sort((a, b) => Number(b.featured === true) - Number(a.featured === true) || (Number(a.order) || 999) - (Number(b.order) || 999));
     let added = 0;
     for (const data of projects) {
       if (added >= 2) break;

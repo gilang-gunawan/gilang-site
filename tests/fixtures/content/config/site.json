@@ -1,0 +1,17 @@
+{
+  "name": "Test Person",
+  "tagline": "Test engineer · Fixture site",
+  "description": "Fixture site used by the build smoke test.",
+  "url": "https://example.com",
+  "contact": {
+    "email": "hello@example.com",
+    "phone": "",
+    "github": "https://github.com/example",
+    "linkedin": "",
+    "bluesky": "",
+    "instagram": "",
+    "x": "",
+    "facebook": "",
+    "threads": ""
+  }
+}

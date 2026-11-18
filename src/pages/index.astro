@@ -17,20 +17,19 @@ const Content = homePage ? (await render(homePage)).Content : null;
 const highlights = homePage?.data.highlights ?? [];
 
 // Calls to action under the intro: what a recruiter wants in the first minute.
-const ctaLinks = [
+type CtaLink = { label: string; href: string; download?: string; primary?: boolean };
+const ctaLinks: CtaLink[] = [
   {
     label: "Download CV",
     href: resumeUrl,
     download: `${(site.name || "Resume").replace(/\s+/g, "_")}_Resume.pdf`,
     primary: true,
   },
-  contact.email && contact.email.trim() !== ""
-    ? { label: "Email me", href: `mailto:${contact.email}` }
-    : undefined,
+  ...(contact.email && contact.email.trim() !== ""
+    ? [{ label: "Email me", href: `mailto:${contact.email}` }]
+    : []),
   { label: "Case studies", href: "/projects" },
-].filter((link): link is { label: string; href: string; download?: string; primary?: boolean } =>
-  Boolean(link),
-);
+];
 
 // Contact links sourced from site.json
 const socialLinks = getSocialLinks();
