@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      # The content submodule is private, so CI runs without it.
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      # Components import src/content/config/site.json directly; give the type
+      # checker the fixture copy since the real one lives in the private submodule.
+      - name: Use fixture site config
+        run: |
+          mkdir -p src/content/config
+          cp tests/fixtures/content/config/site.json src/content/config/site.json
+
+      - run: npm run check
+
+      - run: npm run test
