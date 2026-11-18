@@ -5,13 +5,16 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
-// Builds the real site against the fixture content and checks the output HTML.
+// Builds the site against the fixture content and checks the output HTML.
+// The build runs in a temporary copy of the project: Astro rewrites `.astro/` and
+// `src/lib/knowledge-generated.ts` on every build, which would break a running
+// `astro dev` in the real checkout.
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const fixtureContent = path.join(root, 'tests', 'fixtures', 'content');
-const knowledgeFile = path.join(root, 'src', 'lib', 'knowledge-generated.ts');
+const projectFiles = ['astro.config.mjs', 'package.json', 'tsconfig.json', 'src', 'scripts', 'public'];
 
+let workDir;
 let outDir;
-let savedKnowledge;
 
 function read(...parts) {
   return fs.readFileSync(path.join(outDir, ...parts), 'utf-8');
@@ -26,19 +29,31 @@ function htmlFiles(dir) {
 }
 
 beforeAll(() => {
-  // The build regenerates the chat knowledge file from the fixtures; keep the real one.
-  savedKnowledge = fs.existsSync(knowledgeFile) ? fs.readFileSync(knowledgeFile, 'utf-8') : undefined;
-  outDir = fs.mkdtempSync(path.join(os.tmpdir(), 'gilang-site-build-'));
-  execFileSync('npx', ['astro', 'build', '--outDir', outDir], {
-    cwd: root,
+  workDir = fs.mkdtempSync(path.join(os.tmpdir(), 'gilang-site-build-'));
+  for (const name of projectFiles) {
+    fs.cpSync(path.join(root, name), path.join(workDir, name), {
+      recursive: true,
+      // The real content submodule is replaced by LOCAL_CONTENT_PATH.
+      filter: (src) => !src.startsWith(path.join(root, 'src', 'content') + path.sep),
+    });
+  }
+  fs.symlinkSync(path.join(root, 'node_modules'), path.join(workDir, 'node_modules'), 'dir');
+  // node_modules is shared, so give the copy its own Astro/Vite cache.
+  fs.writeFileSync(
+    path.join(workDir, 'astro.test.config.mjs'),
+    "import config from './astro.config.mjs';\nexport default { ...config, cacheDir: './.cache' };\n",
+  );
+
+  outDir = path.join(workDir, 'dist');
+  execFileSync('npx', ['astro', 'build', '--config', 'astro.test.config.mjs'], {
+    cwd: workDir,
     env: { ...process.env, LOCAL_CONTENT_PATH: fixtureContent },
     stdio: 'pipe',
   });
 }, 180_000);
 
 afterAll(() => {
-  if (savedKnowledge !== undefined) fs.writeFileSync(knowledgeFile, savedKnowledge, 'utf-8');
-  if (outDir) fs.rmSync(outDir, { recursive: true, force: true });
+  if (workDir) fs.rmSync(workDir, { recursive: true, force: true });
 });
 
 describe('home page', () => {

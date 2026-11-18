@@ -206,6 +206,8 @@ The site will be available at `http://localhost:4321`.
 | `npm run dev`       | Start local dev server               |
 | `npm run build`     | Build production output to `dist/`   |
 | `npm run preview`   | Preview the production build locally |
+| `npm run check`     | Type-check `.astro`, `.ts`, and `.js` files (`astro check`) |
+| `npm run test`      | Run Vitest: knowledge script unit tests and a build smoke test against `tests/fixtures/content` |
 
 ## Forking
 
