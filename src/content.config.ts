@@ -34,6 +34,7 @@ const projects = defineCollection({
     featured: z.boolean().optional(),
     link: z.string().url().optional(),
     sourceCode: z.string().url().optional(),
+    linkLabel: z.string().optional(),
     draft: z.boolean().optional().default(false),
   }),
 });
@@ -46,6 +47,10 @@ const pages = defineCollection({
   schema: z.object({
     title: z.string(),
     description: z.string().optional(),
+    // Home only: headline numbers shown under the intro.
+    highlights: z
+      .array(z.object({ value: z.string(), label: z.string() }))
+      .optional(),
   }),
 });
 

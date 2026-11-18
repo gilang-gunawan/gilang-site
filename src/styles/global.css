@@ -379,38 +379,56 @@
     border-radius: var(--border-radius);
 }
 
+  /* Tables follow the card style used elsewhere: one rounded outline,
+     horizontal dividers only, and a quiet uppercase header. */
   .prose table {
-    border-collapse: collapse;
-    width: 100%;
-    margin: 1.5rem 0;
-    display: block;
-    overflow-x: auto;
-}
-
-  .prose table,
-  .prose td,
-  .prose th {
     border: 1px solid var(--color-border);
+    border-collapse: separate;
+    border-radius: var(--border-radius);
+    border-spacing: 0;
+    margin: 1.5rem 0;
+    overflow: hidden;
+    width: 100%;
 }
 
   .prose td,
   .prose th {
-    padding: 12px 24px !important;
-    line-height: 1.6;
+    border: 0;
+    padding: 0.75rem 1rem !important;
+    line-height: 1.55;
+    text-align: left;
+    vertical-align: top;
 }
 
   .prose th {
+    background: transparent;
+    border-bottom: 1px solid var(--color-border);
+    color: var(--color-text-muted);
+    font-size: 0.75rem;
     font-weight: 600;
-    text-align: left;
-    background: var(--color-background-alternate);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
 }
 
-  .prose table tr {
-    background-color: var(--color-background);
+  .prose td {
+    border-top: 1px solid var(--color-border);
 }
 
-  .prose table tr:nth-child(2n) {
-    background: var(--color-background-alternate);
+  .prose tbody tr:first-child td {
+    border-top: 0;
+}
+
+  .prose td:first-child {
+    color: var(--color-text-emphasized);
+    font-weight: 500;
+}
+
+  /* Narrow screens: let wide tables scroll instead of squeezing columns. */
+  @media screen and (max-width: 640px) {
+    .prose table {
+      display: block;
+      overflow-x: auto;
+  }
 }
 
   img {

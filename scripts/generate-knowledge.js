@@ -137,20 +137,23 @@ export function generateChatSuggestions(rootDir = process.cwd()) {
   // 2. Dynamic project-derived suggestions (up to 2, as supporting detail)
   const projectsDir = path.join(contentDir, 'projects');
   if (fs.existsSync(projectsDir)) {
-    const files = fs.readdirSync(projectsDir).filter((f) => f.endsWith('.md') || f.endsWith('.mdx'));
+    // Same priority as the home page: featured first, then by `order`.
+    const projects = fs
+      .readdirSync(projectsDir)
+      .filter((f) => f.endsWith('.md') || f.endsWith('.mdx'))
+      .map((f) => parseFrontmatter(fs.readFileSync(path.join(projectsDir, f), 'utf-8')).data)
+      .filter((data) => !data.draft)
+      .sort((a, b) => (b.featured === true) - (a.featured === true) || (Number(a.order) || 999) - (Number(b.order) || 999));
     let added = 0;
-    for (const file of files) {
+    for (const data of projects) {
       if (added >= 2) break;
-      const raw = fs.readFileSync(path.join(projectsDir, file), 'utf-8');
-      const { data } = parseFrontmatter(raw);
-      if (data.draft) continue;
 
       const catKey = (data.category || '').toLowerCase();
       const icon = CATEGORY_ICONS[catKey] || '🚀';
       suggestions.push({
         icon,
         title: data.title,
-        prompt: `Tell me about the ${data.title} project — what was built, what technical challenges were solved, and what the impact was.`,
+        prompt: `Tell me about the ${data.title} project: what was built, what technical challenges were solved, and what the impact was.`,
       });
       added++;
     }
@@ -159,11 +162,14 @@ export function generateChatSuggestions(rootDir = process.cwd()) {
   // 3. Dynamic blog-derived suggestions (up to 1)
   const blogDir = path.join(contentDir, 'blog');
   if (fs.existsSync(blogDir)) {
-    const files = fs.readdirSync(blogDir).filter((f) => f.endsWith('.md') || f.endsWith('.mdx'));
-    for (const file of files) {
-      const raw = fs.readFileSync(path.join(blogDir, file), 'utf-8');
-      const { data } = parseFrontmatter(raw);
-      if (data.draft) continue;
+    // Latest post by date, not directory order.
+    const posts = fs
+      .readdirSync(blogDir)
+      .filter((f) => f.endsWith('.md') || f.endsWith('.mdx'))
+      .map((f) => parseFrontmatter(fs.readFileSync(path.join(blogDir, f), 'utf-8')).data)
+      .filter((data) => !data.draft)
+      .sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
+    for (const data of posts) {
 
       suggestions.push({
         icon: '✍️',

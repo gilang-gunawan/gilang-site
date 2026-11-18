@@ -18,6 +18,8 @@ function fallbackSiteJsonPlugin() {
   const localContentPath = env.LOCAL_CONTENT_PATH;
   return {
     name: 'fallback-site-json',
+    // Must run before Vite's own resolver, which otherwise resolves the submodule copy first.
+    enforce: 'pre',
     resolveId(id, importer) {
       if (id.includes('content/config') && id.endsWith('site.json')) {
         if (localContentPath) {

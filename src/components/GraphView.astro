@@ -140,7 +140,7 @@ function sid(id: string): string { return id.replace(/[^a-zA-Z0-9]/g, '_'); }
       viewBox={`0 0 ${SVG_W} ${SVG_H}`}
       width={SVG_W}
       height={SVG_H}
-      aria-label={`Knowledge graph organic — ${nodes.length} nodes, ${edges.length} connections`}
+      aria-label={`Knowledge graph: ${nodes.length} nodes, ${edges.length} connections`}
       role="img"
     >
       <g class="kgraph-edges" aria-hidden="true">
